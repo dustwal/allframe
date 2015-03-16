@@ -12,4 +12,4 @@ game_engine.o: game_engine.cpp game_engine.hh game.inl
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
 clean:
-	rm *.swp *.o run
+	rm -f *.swp *.o *run
