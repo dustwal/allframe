@@ -19,8 +19,10 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     controllers(new std::vector<GameController>),
     event_queue(al_create_event_queue()), 
     timer(al_create_timer(1.0)),
-    is_close(false), next_state(NULL), 
+    is_close(false), 
+    next_state(NULL), 
     event_map(new EventMap) {
+    
     if (event_queue == NULL) {
         std::cerr << "ERROR: couldn't create event queue" << std::endl;
         is_close = true;
@@ -29,19 +31,26 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
         std::cerr << "ERROR: couldn't create timer" << std::endl;
         is_close = true;
     }
+    
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
+    
     EventMap& em = *event_map;
     em[ALLEGRO_EVENT_DISPLAY_CLOSE] = &GameState::signal_close;
     em[ALLEGRO_EVENT_TIMER] = &GameState::action_tick;
+    
     setup();
+
 }
 
 
 GameState::~GameState() {
+    
     delete objects;
     delete event_map;
+    
     al_destroy_event_queue(event_queue);
+
 }
 
 GameState* GameState::game_loop() {
@@ -66,7 +75,7 @@ void GameState::action_tick() {
 
     // object updates
     for (auto it = objects->begin(); it != objects->end(); it++) 
-        (*it).update();
+        (*it).object_update();
     
     // controller updates
     for (auto it = controllers->begin(); it != controllers->end(); it++)
@@ -77,4 +86,5 @@ void GameState::action_tick() {
         (*it).draw();
     al_flip_display();
     al_clear_to_color(Colors::BLACK);
+
 }
