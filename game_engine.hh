@@ -13,9 +13,6 @@ namespace alengi {
     int init();
     int close();
 
-    typedef void (*EventHandler)(void);
-    typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
-
     struct Point {
         double x;
         double y;
@@ -61,9 +58,12 @@ namespace alengi {
 
     class GameState {
 
+        typedef void (GameState::*EventHandler)(void);
+        typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
+
         public:
 
-            GameState();
+            GameState(ALLEGRO_DISPLAY*);
             ~GameState();
 
             inline void start() { game_loop(); }
@@ -71,15 +71,18 @@ namespace alengi {
 
         protected:
 
+            ALLEGRO_DISPLAY*            display;
             std::vector<GameObject>*    objects;
             ALLEGRO_EVENT_QUEUE*        event_queue;
+            ALLEGRO_TIMER*              timer;
             bool                        is_close;
             EventMap*                   event_map;
 
             virtual void setup() {}
             virtual void destroy() {}
 
-            void game_loop();
+            GameState* game_loop();
+            void action_tick();
 
             inline GameState* shut_down(GameState* state) { 
                 destroy();

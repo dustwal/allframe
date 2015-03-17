@@ -28,9 +28,8 @@ namespace alengi {
 
             inline void run() {
                 display = al_create_display(width, height);
-                GameState state = T();
-                al_rest(3);
-                //
+                GameState state = T(display);
+                state.start();
             }
 
         private:
