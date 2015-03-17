@@ -1,7 +1,7 @@
-#ifndef __GAME_INL__
-#define __GAME_INL__
+#ifndef __GAME_INL_
+#define __GAME_INL_
 
-namespace alengi {
+namespace allframe {
 
     template <typename T>
     class Game {

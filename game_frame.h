@@ -1,17 +1,22 @@
-#ifndef __GAME_ENGINE_HH__
-#define __GAME_ENGINE_HH__
+#ifndef __GAME_FRAME_H_
+#define __GAME_FRAME_H_
 
 #include <unordered_map>
 #include <vector>
 
 #include <allegro5/allegro.h>
 
-namespace alengi {
-    
-
+namespace allframe {
     
     int init();
     int close();
+
+    namespace Colors {
+        
+        const ALLEGRO_COLOR BLACK = al_map_rgb(0,0,0);
+        const ALLEGRO_COLOR WHITE = al_map_rgb(255,255,255);
+
+    };
 
     struct Point {
         double x;
@@ -56,6 +61,21 @@ namespace alengi {
 
     };
 
+    class GameController {
+
+        public:
+
+            virtual void update() {}
+
+        protected:
+
+            virtual void destroy() {}
+            virtual void setup() {}
+
+        private:
+
+    };
+
     class GameState {
 
         typedef void (GameState::*EventHandler)(void);
@@ -71,12 +91,14 @@ namespace alengi {
 
         protected:
 
-            ALLEGRO_DISPLAY*            display;
-            std::vector<GameObject>*    objects;
-            ALLEGRO_EVENT_QUEUE*        event_queue;
-            ALLEGRO_TIMER*              timer;
-            bool                        is_close;
-            EventMap*                   event_map;
+            ALLEGRO_DISPLAY*                display;
+            std::vector<GameObject>*        objects;
+            std::vector<GameController>*    controllers;
+            ALLEGRO_EVENT_QUEUE*            event_queue;
+            ALLEGRO_TIMER*                  timer;
+            bool                            is_close;
+            GameState*                      next_state;
+            EventMap*                       event_map;
 
             virtual void setup() {}
             virtual void destroy() {}

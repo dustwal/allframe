@@ -1,14 +1,14 @@
 #include <iostream>
 
-#include "game_engine.hh"
+#include "game_frame.h"
 
-using namespace alengi;
+using namespace allframe;
 
-int alengi::init() {
+int allframe::init() {
     return !al_init();
 }
 
-int alengi::close() {
+int allframe::close() {
     return 0;
 }
 
@@ -16,9 +16,11 @@ int alengi::close() {
 GameState::GameState(ALLEGRO_DISPLAY* display) :
     display(display), 
     objects(new std::vector<GameObject>), 
+    controllers(new std::vector<GameController>),
     event_queue(al_create_event_queue()), 
     timer(al_create_timer(1.0)),
-    is_close(false), event_map(new EventMap) {
+    is_close(false), next_state(NULL), 
+    event_map(new EventMap) {
     if (event_queue == NULL) {
         std::cerr << "ERROR: couldn't create event queue" << std::endl;
         is_close = true;
@@ -48,33 +50,31 @@ GameState* GameState::game_loop() {
     EventMap& emap = *event_map;
     al_start_timer(timer);
 
-    bool boo = true;
     while (!is_close) {
-        boo = !boo;
         al_wait_for_event(event_queue, &event);
 
         ALLEGRO_EVENT_TYPE type = event.type;
         if (emap.find(type) != emap.end())
             (this->*emap[event.type])();
-
-            // network events
-            // object updates
-            // controller updates
-            // local game logic
-            // netowrk sync
-            // draw objects
-        
-        is_close = boo;
     }
 
     al_rest(1);
-    return NULL;
+    return shut_down(next_state);
 }
 
 void GameState::action_tick() {
-    if (true)
-        al_clear_to_color(al_map_rgb(155,155,0));
-    else
-        al_clear_to_color(al_map_rgb(0,200,155));
+
+    // object updates
+    for (auto it = objects->begin(); it != objects->end(); it++) 
+        (*it).update();
+    
+    // controller updates
+    for (auto it = controllers->begin(); it != controllers->end(); it++)
+        (*it).update();
+
+    // draw objects
+    for (auto it = objects->begin(); it != objects->end(); it++) 
+        (*it).draw();
     al_flip_display();
+    al_clear_to_color(Colors::BLACK);
 }

@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "game_engine.hh"
+#include "game_frame.h"
 
-using namespace alengi;
+using namespace allframe;
 
 int main() {
     if (init() != 0) return 1;
