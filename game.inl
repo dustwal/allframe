@@ -1,3 +1,6 @@
+#ifndef __GAME_INL__
+#define __GAME_INL__
+
 namespace alengi {
 
     template <typename T>
@@ -40,3 +43,5 @@ namespace alengi {
     };
 
 };
+
+#endif
