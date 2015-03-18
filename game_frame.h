@@ -20,12 +20,6 @@ namespace allframe {
     int init();
     int close();
 
-    namespace Colors {
-        
-        const ALLEGRO_COLOR BLACK = al_map_rgb(0,0,0);
-        const ALLEGRO_COLOR WHITE = al_map_rgb(255,255,255);
-
-    };
     struct Point {
         double x;
         double y;
@@ -42,7 +36,9 @@ namespace allframe {
         
         public:
 
-            ObjectBehavior(GameObject* parent) : parent(parent) {} 
+
+            ObjectBehavior(GameObject* parent) : parent(parent) { setup(); }
+            ~ObjectBehavior() { destroy(); }
 
             // called every iteration of a GameState iteration loop
             virtual void update() {}
@@ -53,7 +49,7 @@ namespace allframe {
             GameObject* parent;
 
             // called on object creation
-            virtual void startup() {}
+            virtual void setup() {}
 
             // called on object destruction
             virtual void destroy() {}
@@ -67,6 +63,11 @@ namespace allframe {
     class GameObject {
 
         public:
+
+            GameObject(GameObject* parent, GameState* parent_state) : 
+                parent(parent), parent_state(parent_state) { setup(); }
+            GameObject(GameState* parent_state) : GameObject(NULL, parent_state) {}
+            ~GameObject() { destroy(); }
             
             // update function. relays the call to bahaviors
             inline void object_update() {
@@ -82,13 +83,14 @@ namespace allframe {
 
             std::vector<ObjectBehavior>*    behaviors;
             GameObject*                     parent;
+            GameState*                      parent_state;
             Point                           position;
             double                          rotation;
 
             // other functions of override
             virtual void update() {}
             virtual void destroy() {}
-            virtual void startup() {}
+            virtual void setup() {}
 
     };
 
@@ -100,7 +102,8 @@ namespace allframe {
 
         public:
 
-            GameController(GameState* parent) : parent(parent) {}
+            GameController(GameState* parent) : parent(parent) { setup(); }
+            ~GameController() { destroy(); }
 
             virtual void update() {}
 
@@ -113,6 +116,7 @@ namespace allframe {
 
     };
 
+
     /* GameState
      * core class that runs the update loop and 
      * holds reference to all objects and 
@@ -123,19 +127,22 @@ namespace allframe {
      */
     class GameState {
 
-        // map event types to class member functions
-        typedef void (GameState::*EventHandler)(void);
-        typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
 
         public:
+
+            static constexpr float FRAME_RATE = 35.0f;
 
             GameState(ALLEGRO_DISPLAY*);
             ~GameState();
 
-            inline void start() { game_loop(); }
+            inline GameState* run() { return game_loop(); }
             void signal_close() { is_close = true; }
 
         protected:
+
+            // map event types to class member functions
+            typedef void (GameState::*EventHandler)(void);
+            typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
 
             ALLEGRO_DISPLAY*                display;
             std::vector<GameObject>*        objects;
@@ -145,6 +152,7 @@ namespace allframe {
             bool                            is_close;
             GameState*                      next_state;
             EventMap*                       event_map;
+            ALLEGRO_COLOR                   scene_color;
 
             // override functions
             virtual void setup() {}
@@ -153,11 +161,6 @@ namespace allframe {
             // event handling
             GameState* game_loop();     // loops through game events
             void action_tick();         // called at each timer event
-
-            inline GameState* shut_down(GameState* state) { 
-                destroy();
-                return state;
-            }
 
     };
 

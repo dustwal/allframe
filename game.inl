@@ -1,6 +1,9 @@
 #ifndef __GAME_INL_
 #define __GAME_INL_
 
+#include <iostream>
+#include <memory>
+
 namespace allframe {
 
     template <typename T>
@@ -28,8 +31,11 @@ namespace allframe {
 
             inline void run() {
                 display = al_create_display(width, height);
-                GameState state = T(display);
-                state.start();
+                std::unique_ptr<GameState> state;
+                state = std::unique_ptr<GameState>(new T(display));
+                while (state != NULL) {
+                    state = std::unique_ptr<GameState>(state->run());
+                }
             }
 
         private:

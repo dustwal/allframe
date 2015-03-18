@@ -9,6 +9,7 @@ int allframe::init() {
 }
 
 int allframe::close() {
+    //al_uninstall_system();
     return 0;
 }
 
@@ -18,10 +19,11 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     objects(new std::vector<GameObject>), 
     controllers(new std::vector<GameController>),
     event_queue(al_create_event_queue()), 
-    timer(al_create_timer(1.0)),
+    timer(al_create_timer(1.0/GameState::FRAME_RATE)),
     is_close(false), 
     next_state(NULL), 
-    event_map(new EventMap) {
+    event_map(new EventMap),
+    scene_color(al_map_rgb(0,0,0)) {
     
     if (event_queue == NULL) {
         std::cerr << "ERROR: couldn't create event queue" << std::endl;
@@ -46,12 +48,16 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
 
 GameState::~GameState() {
     
+    destroy();    
+
     delete objects;
     delete event_map;
     
     al_destroy_event_queue(event_queue);
+    al_destroy_timer(timer);
 
 }
+
 
 GameState* GameState::game_loop() {
     // manage events
@@ -68,7 +74,7 @@ GameState* GameState::game_loop() {
     }
 
     al_rest(1);
-    return shut_down(next_state);
+    return next_state;
 }
 
 void GameState::action_tick() {
@@ -85,6 +91,6 @@ void GameState::action_tick() {
     for (auto it = objects->begin(); it != objects->end(); it++) 
         (*it).draw();
     al_flip_display();
-    al_clear_to_color(Colors::BLACK);
+    al_clear_to_color(scene_color);
 
 }

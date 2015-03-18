@@ -1,0 +1,1 @@
+find a way for fast access to objects of a certain type
