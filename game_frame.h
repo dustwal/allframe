@@ -42,6 +42,7 @@ namespace allframe {
 
             // called every iteration of a GameState iteration loop
             virtual void update() {}
+            virtual std::string get_name() { return behavior_name; }
 
         protected:
 
@@ -54,6 +55,10 @@ namespace allframe {
             // called on object destruction
             virtual void destroy() {}
 
+        private:
+
+            std::string behavior_name = "ob_plain";
+
     };
 
     /* GameObject
@@ -64,56 +69,50 @@ namespace allframe {
 
         public:
 
-            GameObject(GameObject* parent, GameState* parent_state) : 
-                parent(parent), parent_state(parent_state) { setup(); }
-            GameObject(GameState* parent_state) : GameObject(NULL, parent_state) {}
+            GameObject(GameObject* parent, GameState* parent_state, std::string name) : 
+                name(name), parent(parent), parent_state(parent_state) { setup(); }
+            GameObject(GameState* parent_state, std::string name) : 
+                GameObject(NULL, parent_state, name) {}
             ~GameObject() { destroy(); }
             
             // update function. relays the call to bahaviors
             inline void object_update() {
                 for (auto it = behaviors->begin(); it != behaviors->end(); it++)
-                    (*it).update();
+                    (it->second).update();
                 update();
             }
             
             // called during the GameState draw phase
             virtual void draw() {}
+            void rename(std::string name) { (*this).name = name; }
+            std::string get_unique_name() { return name; }
+            std::string get_type_name()   { return object_type; }
+
+            inline bool has_behavior (std::string behavior) {
+                return behaviors->find(behavior) != behaviors->end();
+            }
+
+            inline ObjectBehavior* get_behavior(std::string behavior) {
+                return &(behaviors->find(behavior)->second);
+            }
 
         protected:
 
-            std::vector<ObjectBehavior>*    behaviors;
-            GameObject*                     parent;
-            GameState*                      parent_state;
-            Point                           position;
-            double                          rotation;
+            std::string                                         name;
+            std::unordered_map<std::string, ObjectBehavior>*    behaviors;
+            GameObject*                                         parent;
+            GameState*                                          parent_state;
+            Point                                               position;
+            double                                              rotation;
 
             // other functions of override
             virtual void update() {}
             virtual void destroy() {}
             virtual void setup() {}
 
-    };
+        private:
 
-    /* GameController
-     * defines stately behavior that is outside 
-     * of the scope of a single object
-     */
-    class GameController {
-
-        public:
-
-            GameController(GameState* parent) : parent(parent) { setup(); }
-            ~GameController() { destroy(); }
-
-            virtual void update() {}
-
-        protected:
-
-            GameState* parent;
-
-            virtual void destroy() {}
-            virtual void setup() {}
-
+            std::string object_type = "go_plain";
     };
 
 
@@ -138,21 +137,28 @@ namespace allframe {
             inline GameState* run() { return game_loop(); }
             void signal_close() { is_close = true; }
 
+            std::vector<GameObject*>* get_objects_of_behavior(std::string name);
+            std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name);
+            std::vector<GameObject*>* get_objects_of_type(std::string name);
+            std::string add_object(GameObject& object);
+            void remove_object(std::string name);
+
+            GameObject& get_object(std::string name);
+
         protected:
 
             // map event types to class member functions
             typedef void (GameState::*EventHandler)(void);
             typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
 
-            ALLEGRO_DISPLAY*                display;
-            std::vector<GameObject>*        objects;
-            std::vector<GameController>*    controllers;
-            ALLEGRO_EVENT_QUEUE*            event_queue;
-            ALLEGRO_TIMER*                  timer;
-            bool                            is_close;
-            GameState*                      next_state;
-            EventMap*                       event_map;
-            ALLEGRO_COLOR                   scene_color;
+            ALLEGRO_DISPLAY*                                    display;
+            std::unordered_map<std::string, GameObject>*        objects;
+            ALLEGRO_EVENT_QUEUE*                                event_queue;
+            ALLEGRO_TIMER*                                      timer;
+            bool                                                is_close;
+            GameState*                                          next_state;
+            EventMap*                                           event_map;
+            ALLEGRO_COLOR                                       scene_color;
 
             // override functions
             virtual void setup() {}
