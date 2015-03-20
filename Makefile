@@ -4,7 +4,7 @@ FLAGS=-Wall -g -std=c++14 -O0
 
 all: test_run common.o
 
-test_run: game_frame.o test.o
+test_run: game_frame.o test.o common.o
 	$(GCC) $(LIBS) $(FLAGS) -o $@ $^
 
 test.o: test.cpp game_frame.o

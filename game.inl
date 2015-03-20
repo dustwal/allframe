@@ -34,6 +34,9 @@ namespace allframe {
                 std::unique_ptr<GameState> state;
                 state = std::unique_ptr<GameState>(new T(display));
                 while (state != NULL) {
+                    std::cout << "before setup" << std::endl;
+                    state->setup();
+                    std::cout << "after setup" << std::endl;
                     state = std::unique_ptr<GameState>(state->run());
                 }
             }

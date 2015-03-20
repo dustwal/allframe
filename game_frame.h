@@ -9,6 +9,7 @@
  */
 
 
+#include <iostream>
 #include <unordered_map>
 #include <vector>
 
@@ -62,6 +63,7 @@ namespace allframe {
         public:
             virtual ~Pen() {}
             virtual void draw() const {}
+            void set_parent(GameObject* parent) { this->parent = parent; }
 
         protected:
             GameObject* parent;
@@ -82,8 +84,8 @@ namespace allframe {
             GameObject(GameState* parent_state, std::string name) : 
                 GameObject(NULL, parent_state, name) {}
             ~GameObject() { 
-                if (pencil != NULL) delete pencil;
-                delete behaviors;
+                //if (pencil != NULL) delete pencil;
+                //delete behaviors;
             }
             
             // update function. relays the call to bahaviors
@@ -96,6 +98,13 @@ namespace allframe {
             inline void draw() const { if (pencil != NULL && visible) pencil->draw(); }
             inline void rename(std::string name) { (*this).name = name; }
             inline std::string get_unique_name() const { return name; }
+
+            inline void set_pen(Pen* pen) { 
+                if (pencil != NULL) 
+                    delete pencil; 
+                pencil = pen;
+                pencil->set_parent(this);
+            }
 
             inline void add_behavior(ObjectBehavior& behave) { 
                 //(*behaviors)[behave.get_name()] = behave;
@@ -156,7 +165,8 @@ namespace allframe {
             std::string add_object(GameObject& object);
             void remove_object(std::string name);
 
-            GameObject& get_object(std::string name) const;
+            virtual void setup() { std::cout << "setup GameState" << std::endl; }
+            GameObject* get_object(std::string name) const;
 
         protected:
 
@@ -174,7 +184,6 @@ namespace allframe {
             ALLEGRO_COLOR                                       scene_color;
 
             // override functions
-            virtual void setup() {}
             virtual void destroy() {}
 
             // event handling

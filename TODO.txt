@@ -1,1 +1,2 @@
-find a way for fast access to objects of a certain type
+change event handling from event to function to event to object
+comment

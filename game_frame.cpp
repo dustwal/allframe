@@ -39,7 +39,7 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     em[ALLEGRO_EVENT_DISPLAY_CLOSE] = &GameState::signal_close;
     em[ALLEGRO_EVENT_TIMER] = &GameState::action_tick;
     
-    setup();
+    //setup();
 
 }
 
@@ -81,7 +81,7 @@ std::string GameState::add_object(GameObject& object) {
     while (objects->find(object_name) != objects->end())
         object_name += " repeat";
     object.rename(object_name);
-    //(*objects)[object_name] = object;
+    objects->insert(std::pair<std::string, GameObject>(object_name, object));
     return object_name;
 }
 
@@ -89,18 +89,22 @@ void GameState::remove_object(std::string name) {
     objects->erase(name);
 }
 
-GameObject& GameState::get_object(std::string name) const {
-    return objects->find(name)->second;
+GameObject* GameState::get_object(std::string name) const {
+    auto it = objects->find(name);
+    if (it == objects->end()) return NULL;
+    return &(it->second);
 }
 
 
 GameState* GameState::game_loop() {
     // manage events
+    std::cout << "game_loop" << std::endl;
     ALLEGRO_EVENT event;
     EventMap& emap = *event_map;
     al_start_timer(timer);
 
     while (!is_close) {
+        std::cout << "loop" << std::endl;
         al_wait_for_event(event_queue, &event);
         ALLEGRO_EVENT_TYPE type = event.type;
         if (emap.find(type) != emap.end())

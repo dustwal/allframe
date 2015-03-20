@@ -13,7 +13,7 @@ ALLEGRO_COLOR Colors::random_color_alpha() {
     return al_map_rgba(std::rand()%256, std::rand()%256, std::rand()%256, std::rand()%256);
 }
 
-Point point_rotate(const Point& point, double rotation) {
+Point allframe::point_rotate(const Point& point, double rotation) {
     double theta = std::atan2(point.y, point.x);
     double mag = std::sqrt(point.y*point.y+point.x*point.x);
     theta += rotation;
