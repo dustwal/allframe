@@ -13,7 +13,6 @@ int allframe::close() {
     return 0;
 }
 
-
 GameState::GameState(ALLEGRO_DISPLAY* display) :
     display(display), 
     objects(new std::unordered_map<std::string, GameObject>), 
@@ -57,7 +56,7 @@ GameState::~GameState() {
 
 }
 
-std::vector<GameObject*>* GameState::get_objects_of_behavior(std::string name) {
+std::vector<GameObject*>* GameState::get_objects_of_behavior(std::string name) const {
     auto bobjects = new std::vector<GameObject*>;
     for (auto it = objects->begin(); it != objects->end(); it++) {
         GameObject* obj = &(it->second);
@@ -67,21 +66,13 @@ std::vector<GameObject*>* GameState::get_objects_of_behavior(std::string name) {
     return bobjects;
 }
 
-std::vector<ObjectBehavior*>* GameState::get_behaviors_of_type(std::string name) {
+std::vector<ObjectBehavior*>* GameState::get_behaviors_of_type(std::string name) const {
     auto bobjects = new std::vector<ObjectBehavior*>;
     for (auto it = objects->begin(); it != objects->end(); it++) {
         GameObject* obj = &(it->second);
         if (obj->has_behavior(name))
             bobjects->push_back(obj->get_behavior(name));
     }
-    return bobjects;
-}
-
-std::vector<GameObject*>* GameState::get_objects_of_type(std::string name) {
-    auto bobjects = new std::vector<GameObject*>;
-    for (auto it = objects->begin(); it != objects->end(); it++) 
-        if (it->second.get_type_name() == name)
-            bobjects->push_back(&(it->second));
     return bobjects;
 }
 
@@ -98,7 +89,7 @@ void GameState::remove_object(std::string name) {
     objects->erase(name);
 }
 
-GameObject& GameState::get_object(std::string name) {
+GameObject& GameState::get_object(std::string name) const {
     return objects->find(name)->second;
 }
 
@@ -111,7 +102,6 @@ GameState* GameState::game_loop() {
 
     while (!is_close) {
         al_wait_for_event(event_queue, &event);
-
         ALLEGRO_EVENT_TYPE type = event.type;
         if (emap.find(type) != emap.end())
             (this->*emap[event.type])();
@@ -125,7 +115,7 @@ void GameState::action_tick() {
 
     // object updates
     for (auto it = objects->begin(); it != objects->end(); it++) 
-        (it->second).object_update();
+        (it->second).update();
 
     // draw objects
     for (auto it = objects->begin(); it != objects->end(); it++) 

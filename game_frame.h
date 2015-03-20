@@ -36,28 +36,35 @@ namespace allframe {
         
         public:
 
-
             ObjectBehavior(GameObject* parent) : parent(parent) { setup(); }
             ~ObjectBehavior() { destroy(); }
 
             // called every iteration of a GameState iteration loop
             virtual void update() {}
-            virtual std::string get_name() { return behavior_name; }
+            virtual std::string get_name() const { return behavior_name; }
 
         protected:
 
             // to allow for groups of objects and hierarchies
             GameObject* parent;
-
             // called on object creation
             virtual void setup() {}
-
             // called on object destruction
             virtual void destroy() {}
 
         private:
-
             std::string behavior_name = "ob_plain";
+
+    };
+
+    class Pen {
+
+        public:
+            virtual ~Pen() {}
+            virtual void draw() const {}
+
+        protected:
+            GameObject* parent;
 
     };
 
@@ -70,31 +77,42 @@ namespace allframe {
         public:
 
             GameObject(GameObject* parent, GameState* parent_state, std::string name) : 
-                name(name), parent(parent), parent_state(parent_state) { setup(); }
+                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior>), 
+                parent(parent), parent_state(parent_state), visible(true), pencil(NULL) {}
             GameObject(GameState* parent_state, std::string name) : 
                 GameObject(NULL, parent_state, name) {}
-            ~GameObject() { destroy(); }
+            ~GameObject() { 
+                if (pencil != NULL) delete pencil;
+                delete behaviors;
+            }
             
             // update function. relays the call to bahaviors
-            inline void object_update() {
+            inline void update() {
                 for (auto it = behaviors->begin(); it != behaviors->end(); it++)
                     (it->second).update();
                 update();
             }
             
-            // called during the GameState draw phase
-            virtual void draw() {}
-            void rename(std::string name) { (*this).name = name; }
-            std::string get_unique_name() { return name; }
-            std::string get_type_name()   { return object_type; }
+            inline void draw() const { if (pencil != NULL && visible) pencil->draw(); }
+            inline void rename(std::string name) { (*this).name = name; }
+            inline std::string get_unique_name() const { return name; }
 
-            inline bool has_behavior (std::string behavior) {
+            inline void add_behavior(ObjectBehavior& behave) { 
+                //(*behaviors)[behave.get_name()] = behave;
+            }
+            inline void remove_behavior(std::string) { behaviors->erase(name); }
+            inline bool has_behavior (std::string behavior) const {
                 return behaviors->find(behavior) != behaviors->end();
             }
 
-            inline ObjectBehavior* get_behavior(std::string behavior) {
+            inline ObjectBehavior* get_behavior(std::string behavior) const {
                 return &(behaviors->find(behavior)->second);
             }
+
+            inline double   get_rotation() const { return rotation; }
+            inline void     set_rotation(double rotation) { this->rotation = rotation; }
+            inline Point    get_position() const { return position; }
+            inline void     set_position(const Point& point) { this->position = point; }
 
         protected:
 
@@ -104,14 +122,10 @@ namespace allframe {
             GameState*                                          parent_state;
             Point                                               position;
             double                                              rotation;
-
-            // other functions of override
-            virtual void update() {}
-            virtual void destroy() {}
-            virtual void setup() {}
+            bool                                                visible;
+            Pen*                                                pencil;
 
         private:
-
             std::string object_type = "go_plain";
     };
 
@@ -122,7 +136,7 @@ namespace allframe {
      * controllers in the game.
      *
      * only override needed is the setup for setting
-     * the base game objects
+     * the basevoid add_behavior(); game objects
      */
     class GameState {
 
@@ -137,13 +151,12 @@ namespace allframe {
             inline GameState* run() { return game_loop(); }
             void signal_close() { is_close = true; }
 
-            std::vector<GameObject*>* get_objects_of_behavior(std::string name);
-            std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name);
-            std::vector<GameObject*>* get_objects_of_type(std::string name);
+            std::vector<GameObject*>* get_objects_of_behavior(std::string name) const;
+            std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const;
             std::string add_object(GameObject& object);
             void remove_object(std::string name);
 
-            GameObject& get_object(std::string name);
+            GameObject& get_object(std::string name) const;
 
         protected:
 

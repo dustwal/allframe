@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "game_frame.h"
+#include "allframe.h"
 
 using namespace allframe;
 

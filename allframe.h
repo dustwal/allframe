@@ -2,6 +2,6 @@
 #define __ALLFRAME_H_
 
 #include "game_frame.h"
-#include "core_behavior.h"
+#include "common.h"
 
 #endif
