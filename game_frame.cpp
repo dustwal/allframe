@@ -188,9 +188,10 @@ GameState* GameState::game_loop() {
     al_start_timer(timer);
 
     while (!is_close) {
-        //std::cout << "loop" << std::endl;
         al_wait_for_event(event_queue, &event);
         ALLEGRO_EVENT_TYPE type = event.type;
+        //if (type != ALLEGRO_EVENT_TIMER)
+        //    std::cout << type << std::endl;
         if (emap.find(type) != emap.end())
             emap[event.type]->event(event);
     }

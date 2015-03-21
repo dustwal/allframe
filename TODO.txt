@@ -1,3 +1,4 @@
+figure out seg_faults on close (free errors)
 and sound addons
 create a basic game with allframe
 start making generic objects (like menu)
