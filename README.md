@@ -1,2 +1,2 @@
 # allframe
-Framework on top of the Allegr game library
+Framework on top of the Allegro game library

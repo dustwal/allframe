@@ -1,5 +1,3 @@
-change event handling from event to function to event to object
-add primitives and sound addons
-get behaviors working
+and sound addons
 create a basic game with allframe
 comment

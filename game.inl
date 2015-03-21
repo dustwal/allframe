@@ -26,7 +26,7 @@ namespace allframe {
             }
 
             inline ~Game() {
-                al_destroy_display(display);
+                //al_destroy_display(display);
             }
 
             inline void run() {
@@ -39,6 +39,7 @@ namespace allframe {
                     //std::cout << "after setup" << std::endl;
                     state = std::unique_ptr<GameState>(state->run());
                 }
+                std::cout << "end_run" << std::endl;
             }
 
         private:

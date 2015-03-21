@@ -1,5 +1,5 @@
 GCC=g++
-LIBS=`pkg-config --libs allegro-5.0`
+LIBS=`pkg-config --libs allegro_primitives-5.0`
 FLAGS=-Wall -g -std=c++14 -O0
 
 all: test_run common.o

@@ -38,10 +38,11 @@ namespace allframe {
         public:
 
             ObjectBehavior(GameObject* parent) : parent(parent) { setup(); }
-            ~ObjectBehavior() { destroy(); }
+            virtual ~ObjectBehavior() { destroy(); }
 
             // called every iteration of a GameState iteration loop
             virtual void update() {}
+            inline void set_parent(GameObject* parent) { this->parent = parent; }
             virtual std::string get_name() const { return behavior_name; }
 
         protected:
@@ -70,6 +71,35 @@ namespace allframe {
 
     };
 
+    class EventHandler {
+        
+        public:
+            EventHandler(GameState* state) : parent(state) {}
+            virtual ~EventHandler() {}
+            virtual void event(ALLEGRO_EVENT&) = 0;
+
+        protected:
+            GameState* parent;
+
+    };
+
+    class TickEvent : public EventHandler {
+
+        public:
+            TickEvent(GameState* state) : EventHandler(state) {}
+            void event(ALLEGRO_EVENT&);
+
+
+    };
+
+    class CloseEvent : public EventHandler {
+
+        public:
+            CloseEvent(GameState* state) : EventHandler(state) {}
+            void event(ALLEGRO_EVENT&);
+            
+    };
+
     /* GameObject
      * To represent an object in the game.
      * Each Game object has a list of behaviors it employs
@@ -79,12 +109,12 @@ namespace allframe {
         public:
 
             GameObject(GameState* parent_state, std::string name) : 
-                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior>), 
+                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior*>), 
                 parent(NULL), parent_state(parent_state), visible(true), pencil(NULL) {}
             
             GameObject(const GameObject& other) : 
                 name(other.name), 
-                behaviors(new std::unordered_map<std::string, ObjectBehavior>),
+                behaviors(new std::unordered_map<std::string, ObjectBehavior*>),
                 parent(other.parent), parent_state(other.parent_state),
                 position(other.position), rotation(other.rotation), 
                 visible(other.visible), pencil(other.pencil) {
@@ -92,13 +122,15 @@ namespace allframe {
                     behaviors->insert(*it);
             }
             ~GameObject() { 
+                for(auto it = behaviors->begin(); it != behaviors->end(); it++)
+                    delete it->second;
                 delete behaviors;
             }
             
             // update function. relays the call to bahaviors
             inline void update() {
                 for (auto it = behaviors->begin(); it != behaviors->end(); it++)
-                    (it->second).update();
+                    (it->second)->update();
             }
             
             inline void draw() const { if (pencil != NULL && visible) pencil->draw(); }
@@ -109,8 +141,9 @@ namespace allframe {
     
             inline void set_parent_object(GameObject* parent) { this->parent = parent; }
 
-            inline void add_behavior(ObjectBehavior& behave) { 
-                //(*behaviors)[behave.get_name()] = behave;
+            inline void add_behavior(ObjectBehavior* behave) { 
+                behave->set_parent(this);
+                (*behaviors)[behave->get_name()] = behave;
             }
             inline void remove_behavior(std::string) { behaviors->erase(name); }
             inline bool has_behavior (std::string behavior) const {
@@ -118,7 +151,7 @@ namespace allframe {
             }
 
             inline ObjectBehavior* get_behavior(std::string behavior) const {
-                return &(behaviors->find(behavior)->second);
+                return (behaviors->find(behavior)->second);
             }
 
             inline double   get_rotation() const { return rotation; }
@@ -129,7 +162,7 @@ namespace allframe {
         protected:
 
             std::string                                         name;
-            std::unordered_map<std::string, ObjectBehavior>*    behaviors;
+            std::unordered_map<std::string, ObjectBehavior*>*   behaviors;
             GameObject*                                         parent;
             GameState*                                          parent_state;
             Point                                               position;
@@ -156,6 +189,7 @@ namespace allframe {
         public:
 
             static constexpr float FRAME_RATE = 35.0f;
+            std::unordered_map<std::string, GameObject>*            objects;
 
             GameState(ALLEGRO_DISPLAY*);
             ~GameState();
@@ -168,33 +202,28 @@ namespace allframe {
             std::string add_object(std::string name);
             void remove_object(std::string name);
 
-
             virtual void setup() { std::cout << "setup GameState" << std::endl; }
             GameObject* get_object(std::string name) const;
             inline void add_pen(Pen* pen) { pens->push_back(pen); }
+            inline ALLEGRO_COLOR get_color() { return scene_color; }
 
         protected:
 
-            // map event types to class member functions
-            typedef void (GameState::*EventHandler)(void);
-            typedef std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler> EventMap;
-
-            ALLEGRO_DISPLAY*                                    display;
-            std::unordered_map<std::string, GameObject>*        objects;
-            ALLEGRO_EVENT_QUEUE*                                event_queue;
-            ALLEGRO_TIMER*                                      timer;
-            bool                                                is_close;
-            GameState*                                          next_state;
-            EventMap*                                           event_map;
-            ALLEGRO_COLOR                                       scene_color;
-            std::vector<Pen*>*                                  pens;
+            ALLEGRO_DISPLAY*                                        display;
+            ALLEGRO_EVENT_QUEUE*                                    event_queue;
+            ALLEGRO_TIMER*                                          timer;
+            bool                                                    is_close;
+            GameState*                                              next_state;
+            std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler*>*  event_map;
+            ALLEGRO_COLOR                                           scene_color;
+            std::vector<Pen*>*                                      pens;
             
             // override functions
             virtual void destroy() {}
 
             // event handling
             GameState* game_loop();     // loops through game events
-            void action_tick();         // called at each timer event
+            //void action_tick();         // called at each timer event
 
     };
 
