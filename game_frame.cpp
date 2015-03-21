@@ -50,6 +50,7 @@ void TickEvent::event(ALLEGRO_EVENT& event) {
 }
 
 void CloseEvent::event(ALLEGRO_EVENT& event) {
+    std::cout << "exiting" << std::endl;
     parent->signal_close();
 }
 
@@ -148,15 +149,17 @@ std::string GameState::add_object_topof(std::string name, std::string topof) {
     }
     while (objects->find(name) != objects->end())
         name += " repeat";
-    auto it_next = std::next(it,1);
-    double z = (it->second) + 1;
-    if (it_next != names_to_z->end())
-        z = (z-1 + it_next->second) / 2.0;
-    std::cout << name << " " << z;
+    auto it_now = sorted_objects->find(it->second);
+    auto it_next = std::next(it_now,1);
+    double z = (it_now->first) + 1;
+    if (it_next != sorted_objects->end())
+        z = (z-1 + it_next->first) / 2.0;
+    std::cout << name << " " << z << std::endl;
     GameObject obj(this, name);
     objects->insert(std::pair<std::string, GameObject>(name, obj));
     (*names_to_z)[name] = z;
     (*sorted_objects)[z] = &(objects->find(name)->second);
+    std::cout << sorted_objects->size() << std::endl;
     return name;
 }
 
