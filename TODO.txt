@@ -1,3 +1,4 @@
+define draw ordering
 and sound addons
 create a basic game with allframe
 comment

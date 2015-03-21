@@ -9,9 +9,9 @@ class RandomDraw : public Pen {
     public:
         void draw() const {
             //std::cout << "nooo" << std::endl;
-            //al_clear_to_color(Colors::random_color());
-            Point pp = parent->get_position();
-            al_draw_filled_rectangle(pp.x,pp.y,pp.x+50,pp.y+50,al_map_rgb(0,155,155));
+            al_clear_to_color(Colors::random_color());
+            //Point pp = parent->get_position();
+            //al_draw_filled_rectangle(pp.x,pp.y,pp.x+50,pp.y+50,al_map_rgb(0,155,155));
         }
 
 };
@@ -65,6 +65,12 @@ class TestState : public GameState {
                 ObjectBehavior* ob = new Gravity(NULL);
                 obj_ptr->set_pen(pen);
                 obj_ptr->add_behavior(ob);
+            }
+            name = add_object_topof("o3", "o1");
+            obj_ptr = get_object(name);
+            if (obj_ptr != NULL) {
+                pen = new DrawRectangle;
+                obj_ptr->set_pen(pen);
             }
             std::cout << "setup " << name << " " << objects->size() << std::endl;
         }

@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -189,7 +190,6 @@ namespace allframe {
         public:
 
             static constexpr float FRAME_RATE = 35.0f;
-            std::unordered_map<std::string, GameObject>*            objects;
 
             GameState(ALLEGRO_DISPLAY*);
             ~GameState();
@@ -200,6 +200,7 @@ namespace allframe {
             std::vector<GameObject*>* get_objects_of_behavior(std::string name) const;
             std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const;
             std::string add_object(std::string name);
+            std::string add_object_topof(std::string, std::string);
             void remove_object(std::string name);
 
             virtual void setup() { std::cout << "setup GameState" << std::endl; }
@@ -207,8 +208,26 @@ namespace allframe {
             inline void add_pen(Pen* pen) { pens->push_back(pen); }
             inline ALLEGRO_COLOR get_color() { return scene_color; }
 
+            inline std::map<double, GameObject*>::iterator get_begin() { 
+                return sorted_objects->begin(); 
+            }
+
+            inline std::map<double, GameObject*>::iterator get_end() { 
+                return sorted_objects->end();
+            }
+
+            inline std::map<double, GameObject*>::reverse_iterator get_rbegin() {
+                return sorted_objects->rbegin();
+            } 
+            inline std::map<double, GameObject*>::reverse_iterator get_rend() { 
+                return sorted_objects->rend();
+            }
+
         protected:
 
+            std::unordered_map<std::string, GameObject>*            objects;
+            std::unordered_map<std::string, double>*                names_to_z;
+            std::map<double, GameObject*>*                          sorted_objects;
             ALLEGRO_DISPLAY*                                        display;
             ALLEGRO_EVENT_QUEUE*                                    event_queue;
             ALLEGRO_TIMER*                                          timer;

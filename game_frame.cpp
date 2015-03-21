@@ -25,15 +25,25 @@ void TickEvent::event(ALLEGRO_EVENT& event) {
 
     //std::cout<< "tick" << std::endl;
     // object updates
+    /*
     for (auto it = parent->objects->begin(); it != parent->objects->end(); it++) 
         (it->second).update();
+    */
+    for (auto it = parent->get_begin(); it != parent->get_end(); it++) {
+        //std::cout << it->first << std::endl;
+        (it->second)->update();
+    }
 
     //std::cout<< "tick middle" << std::endl;
     // draw objects
+    //for (auto it = parent->objects->begin(); it != parent->objects->end(); it++) 
+    //    (it->second).draw();
+    for (auto it = parent->get_begin(); it != parent->get_end(); it++) { 
+        //std::cout << it->first << std::endl;
+        (it->second)->draw();
+    }
     al_flip_display();
     al_clear_to_color(parent->get_color());
-    for (auto it = parent->objects->begin(); it != parent->objects->end(); it++) 
-        (it->second).draw();
     
     //std::cout<< "tick end" << std::endl;
 
@@ -45,6 +55,8 @@ void CloseEvent::event(ALLEGRO_EVENT& event) {
 
 GameState::GameState(ALLEGRO_DISPLAY* display) :
     objects(new std::unordered_map<std::string, GameObject>), 
+    names_to_z(new std::unordered_map<std::string, double>),
+    sorted_objects(new std::map<double, GameObject*>),
     display(display), 
     event_queue(al_create_event_queue()), 
     timer(al_create_timer(1.0/GameState::FRAME_RATE)),
@@ -85,7 +97,9 @@ GameState::~GameState() {
     delete objects;
     delete event_map;
     delete pens;
-    
+    delete names_to_z;
+    delete sorted_objects;
+
     al_destroy_event_queue(event_queue);
     al_destroy_timer(timer);
     std::cout << "end destructor" << std::endl;
@@ -117,11 +131,43 @@ std::string GameState::add_object(std::string name) {
         name += " repeat";
     GameObject obj(this, name);
     objects->insert(std::pair<std::string, GameObject>(name, obj));
+    GameObject* obj_ptr = &(objects->find(name)->second);
+    double z = 0;
+    if (sorted_objects->size() != 0)
+        z = (sorted_objects->rbegin()->first) + 1;
+    (*names_to_z)[name] = z;
+    (*sorted_objects)[z] = obj_ptr;
+    return name;
+}
+
+std::string GameState::add_object_topof(std::string name, std::string topof) {
+    auto it = names_to_z->find(topof);
+    if (it == names_to_z->end()) {
+        std::cerr << "no object " << topof << " to place on top of." << std::endl;
+        return "";
+    }
+    while (objects->find(name) != objects->end())
+        name += " repeat";
+    auto it_next = std::next(it,1);
+    double z = (it->second) + 1;
+    if (it_next != names_to_z->end())
+        z = (z-1 + it_next->second) / 2.0;
+    std::cout << name << " " << z;
+    GameObject obj(this, name);
+    objects->insert(std::pair<std::string, GameObject>(name, obj));
+    (*names_to_z)[name] = z;
+    (*sorted_objects)[z] = &(objects->find(name)->second);
     return name;
 }
 
 void GameState::remove_object(std::string name) {
+    auto it = objects->find(name);
+    if (it == objects->end())
+        return;
     objects->erase(name);
+    double z = names_to_z->find(name)->second;
+    names_to_z->erase(name);
+    sorted_objects->erase(sorted_objects->find(z));
 }
 
 GameObject* GameState::get_object(std::string name) const {
@@ -149,24 +195,3 @@ GameState* GameState::game_loop() {
     al_rest(1);
     return next_state;
 }
-
-/*
-void GameState::action_tick() {
-
-    //std::cout<< "tick" << std::endl;
-    // object updates
-    for (auto it = objects->begin(); it != objects->end(); it++) { 
-        //std::cout << it->first << std::endl;
-        (it->second).update();
-    }
-
-    //std::cout<< "tick middle" << std::endl;
-    // draw objects
-    for (auto it = objects->begin(); it != objects->end(); it++) 
-        (it->second).draw();
-    al_flip_display();
-    al_clear_to_color(scene_color);
-    
-    //std::cout<< "tick end" << std::endl;
-
-}*/
