@@ -8,7 +8,7 @@ class RandomDraw : public Pen {
 
     public:
         void draw() const {
-            std::cout << "nooo" << std::endl;
+            //std::cout << "nooo" << std::endl;
             al_clear_to_color(Colors::random_color());
         }
 
@@ -21,11 +21,13 @@ class TestState : public GameState {
 
     protected:
         void setup() {
-            GameObject object(this, "o1");
-            Pen* pen = new RandomDraw;
-            object.set_pen(pen);
-            add_object(object);
-            std::cout << "setup " << get_object("o1") << " " << objects->size() << std::endl;
+            Pen* pen = new RandomDraw; // TODO never freed
+            std::string name = add_object("o1");
+            GameObject* obj_ptr = get_object(name);
+            if (obj_ptr != NULL) {
+                obj_ptr->set_pen(pen);
+            }
+            std::cout << "setup " << name << " " << objects->size() << std::endl;
         }
 };
 

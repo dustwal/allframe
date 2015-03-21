@@ -63,7 +63,7 @@ namespace allframe {
         public:
             virtual ~Pen() {}
             virtual void draw() const {}
-            void set_parent(GameObject* parent) { this->parent = parent; }
+            inline void set_parent(GameObject* parent) { this->parent = parent; } 
 
         protected:
             GameObject* parent;
@@ -78,33 +78,36 @@ namespace allframe {
 
         public:
 
-            GameObject(GameObject* parent, GameState* parent_state, std::string name) : 
-                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior>), 
-                parent(parent), parent_state(parent_state), visible(true), pencil(NULL) {}
             GameObject(GameState* parent_state, std::string name) : 
-                GameObject(NULL, parent_state, name) {}
+                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior>), 
+                parent(NULL), parent_state(parent_state), visible(true), pencil(NULL) {}
+            
+            GameObject(const GameObject& other) : 
+                name(other.name), 
+                behaviors(new std::unordered_map<std::string, ObjectBehavior>),
+                parent(other.parent), parent_state(other.parent_state),
+                position(other.position), rotation(other.rotation), 
+                visible(other.visible), pencil(other.pencil) {
+                for (auto it = other.behaviors->begin(); it != other.behaviors->end(); it++)
+                    behaviors->insert(*it);
+            }
             ~GameObject() { 
-                //if (pencil != NULL) delete pencil;
-                //delete behaviors;
+                delete behaviors;
             }
             
             // update function. relays the call to bahaviors
             inline void update() {
                 for (auto it = behaviors->begin(); it != behaviors->end(); it++)
                     (it->second).update();
-                update();
             }
             
             inline void draw() const { if (pencil != NULL && visible) pencil->draw(); }
             inline void rename(std::string name) { (*this).name = name; }
             inline std::string get_unique_name() const { return name; }
 
-            inline void set_pen(Pen* pen) { 
-                if (pencil != NULL) 
-                    delete pencil; 
-                pencil = pen;
-                pencil->set_parent(this);
-            }
+            void set_pen(Pen*); 
+    
+            inline void set_parent_object(GameObject* parent) { this->parent = parent; }
 
             inline void add_behavior(ObjectBehavior& behave) { 
                 //(*behaviors)[behave.get_name()] = behave;
@@ -162,11 +165,13 @@ namespace allframe {
 
             std::vector<GameObject*>* get_objects_of_behavior(std::string name) const;
             std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const;
-            std::string add_object(GameObject& object);
+            std::string add_object(std::string name);
             void remove_object(std::string name);
+
 
             virtual void setup() { std::cout << "setup GameState" << std::endl; }
             GameObject* get_object(std::string name) const;
+            inline void add_pen(Pen* pen) { pens->push_back(pen); }
 
         protected:
 
@@ -182,7 +187,8 @@ namespace allframe {
             GameState*                                          next_state;
             EventMap*                                           event_map;
             ALLEGRO_COLOR                                       scene_color;
-
+            std::vector<Pen*>*                                  pens;
+            
             // override functions
             virtual void destroy() {}
 

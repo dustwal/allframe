@@ -13,6 +13,13 @@ int allframe::close() {
     return 0;
 }
 
+void GameObject::set_pen(Pen* pen) {
+    // if pens contulually set memory is not freed TODO
+    parent_state->add_pen(pen);
+    pencil = pen;
+    pencil->set_parent(this);
+}
+
 GameState::GameState(ALLEGRO_DISPLAY* display) :
     display(display), 
     objects(new std::unordered_map<std::string, GameObject>), 
@@ -21,7 +28,8 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     is_close(false), 
     next_state(NULL), 
     event_map(new EventMap),
-    scene_color(al_map_rgb(0,0,0)) {
+    scene_color(al_map_rgb(0,0,0)),
+    pens(new std::vector<Pen*>) {
     
     if (event_queue == NULL) {
         std::cerr << "ERROR: couldn't create event queue" << std::endl;
@@ -39,8 +47,6 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     em[ALLEGRO_EVENT_DISPLAY_CLOSE] = &GameState::signal_close;
     em[ALLEGRO_EVENT_TIMER] = &GameState::action_tick;
     
-    //setup();
-
 }
 
 
@@ -48,8 +54,12 @@ GameState::~GameState() {
     
     destroy();    
 
+    for (auto it = pens->begin(); it != pens->end(); it++)
+        delete &(*it);
+
     delete objects;
     delete event_map;
+    delete pens;
     
     al_destroy_event_queue(event_queue);
     al_destroy_timer(timer);
@@ -76,13 +86,12 @@ std::vector<ObjectBehavior*>* GameState::get_behaviors_of_type(std::string name)
     return bobjects;
 }
 
-std::string GameState::add_object(GameObject& object) {
-    std::string object_name = object.get_unique_name();
-    while (objects->find(object_name) != objects->end())
-        object_name += " repeat";
-    object.rename(object_name);
-    objects->insert(std::pair<std::string, GameObject>(object_name, object));
-    return object_name;
+std::string GameState::add_object(std::string name) {
+    while (objects->find(name) != objects->end())
+        name += " repeat";
+    GameObject obj(this, name);
+    objects->insert(std::pair<std::string, GameObject>(name, obj));
+    return name;
 }
 
 void GameState::remove_object(std::string name) {
@@ -98,13 +107,13 @@ GameObject* GameState::get_object(std::string name) const {
 
 GameState* GameState::game_loop() {
     // manage events
-    std::cout << "game_loop" << std::endl;
+    //std::cout << "game_loop" << std::endl;
     ALLEGRO_EVENT event;
     EventMap& emap = *event_map;
     al_start_timer(timer);
 
     while (!is_close) {
-        std::cout << "loop" << std::endl;
+        //std::cout << "loop" << std::endl;
         al_wait_for_event(event_queue, &event);
         ALLEGRO_EVENT_TYPE type = event.type;
         if (emap.find(type) != emap.end())
@@ -117,14 +126,20 @@ GameState* GameState::game_loop() {
 
 void GameState::action_tick() {
 
+    //std::cout<< "tick" << std::endl;
     // object updates
-    for (auto it = objects->begin(); it != objects->end(); it++) 
+    for (auto it = objects->begin(); it != objects->end(); it++) { 
+        //std::cout << it->first << std::endl;
         (it->second).update();
+    }
 
+    //std::cout<< "tick middle" << std::endl;
     // draw objects
     for (auto it = objects->begin(); it != objects->end(); it++) 
         (it->second).draw();
     al_flip_display();
     al_clear_to_color(scene_color);
+    
+    //std::cout<< "tick end" << std::endl;
 
 }
