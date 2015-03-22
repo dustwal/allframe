@@ -19,7 +19,11 @@ class RandomDraw : public Pen {
 class Gravity : public ObjectBehavior {
 
     public:
-        Gravity(GameObject* parent) : ObjectBehavior(parent), ddy(1.0f), dy(0) {}
+        void setup() {
+            ddy = 1.0f;
+            dy = 0;
+        }
+
         void update() {
             Point pp = parent->get_position();
             if (pp.y+dy >= 500)
@@ -62,7 +66,7 @@ class TestState : public GameState {
             obj_ptr = get_object(name);
             if (obj_ptr != NULL) {
                 pen = new DrawRectangle;
-                ObjectBehavior* ob = new Gravity(NULL);
+                ObjectBehavior* ob = new Gravity;
                 obj_ptr->set_pen(pen);
                 obj_ptr->add_behavior(ob);
             }

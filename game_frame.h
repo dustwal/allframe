@@ -38,11 +38,13 @@ namespace allframe {
         
         public:
 
-            ObjectBehavior(GameObject* parent) : parent(parent) { setup(); }
+            ObjectBehavior() : parent(NULL) {}
             virtual ~ObjectBehavior() { destroy(); }
 
             // called every iteration of a GameState iteration loop
             virtual void update() {}
+            // called on object creation
+            virtual void setup() {}
             inline void set_parent(GameObject* parent) { this->parent = parent; }
             virtual std::string get_name() const { return behavior_name; }
 
@@ -50,8 +52,6 @@ namespace allframe {
 
             // to allow for groups of objects and hierarchies
             GameObject* parent;
-            // called on object creation
-            virtual void setup() {}
             // called on object destruction
             virtual void destroy() {}
 
@@ -144,6 +144,7 @@ namespace allframe {
 
             inline void add_behavior(ObjectBehavior* behave) { 
                 behave->set_parent(this);
+                behave->setup();
                 (*behaviors)[behave->get_name()] = behave;
             }
             inline void remove_behavior(std::string) { behaviors->erase(name); }

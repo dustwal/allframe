@@ -6,7 +6,7 @@ class Box : public Pen {
 
     public:
         void draw() const {
-            al_draw_filled_rectangle(20,20,505,505,al_map_rgb(10,10,20));
+            al_draw_filled_rectangle(20,20,505,505,al_map_rgb(10,15,20));
         }
 };
 
@@ -15,16 +15,21 @@ class Circle : public Pen {
     public:
         void draw() const {
             Point pp = parent->get_position();
-            al_draw_filled_circle(pp.x,pp.y,5,al_map_rgb(200,0,0));
+            al_draw_filled_circle(pp.x,pp.y,5,Colors::random_color());
         }
 };
 
 class Ball : public ObjectBehavior {
     
     public:
-        Ball(GameObject* parent) : ObjectBehavior(parent),
-            x(250), y(250), dx(0), dy(0) {}
         std::string get_name() const { return "ball"; }
+
+        void setup() {
+            x = 250;
+            y = 250;
+            dx = 0;
+            dy = 0;
+        }
 
         void update() {
             x += dx;
@@ -74,7 +79,6 @@ class KeyHandler : public EventHandler {
     public:
         KeyHandler(GameState* parent) : EventHandler(parent) {}
         void event(ALLEGRO_EVENT& event) {
-            std::cout << "key press" << std::endl;
             Ball* ball = (Ball*) parent->get_object("ball")->get_behavior("ball");
             switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_ESCAPE:
@@ -119,7 +123,7 @@ class BallGame : public GameState {
             obj = get_object(name);
             if (obj != NULL) {
                 obj->set_pen(new Circle);
-                obj->add_behavior(new Ball(NULL));
+                obj->add_behavior(new Ball);
             }
         }
 };

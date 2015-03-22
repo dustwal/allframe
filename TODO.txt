@@ -1,3 +1,4 @@
+get rid of display in GameState constructor
 figure out seg_faults on close (free errors)
 and sound addons
 create a basic game with allframe
