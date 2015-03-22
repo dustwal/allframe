@@ -4,23 +4,23 @@ FLAGS=-Wall -g -std=c++14 -O0
 
 all: test_run mini_run
 
-mini_run: mini_game.o game_frame.o common.o
+mini_run: examples/mini_game.o core/game_frame.o core/common.o
 	$(GCC) $(LIBS) $(FLAGS) -o $@ $^
 
-mini_game.o: mini_game.cpp game_frame.h common.h
+examples/mini_game.o: examples/mini_game.cpp core/game_frame.h core/common.h
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
-test_run: game_frame.o test.o common.o
+test_run: core/game_frame.o test/test.o core/common.o
 	$(GCC) $(LIBS) $(FLAGS) -o $@ $^
 
-test.o: test.cpp game_frame.o
+test/test.o: test/test.cpp core/game_frame.o
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
-common.o: common.cpp common.h game_frame.h
+core/common.o: core/common.cpp core/common.h core/game_frame.h
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
-game_frame.o: game_frame.cpp game_frame.h game.inl
+core/game_frame.o: core/game_frame.cpp core/game_frame.h core/game.inl
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
 clean:
-	rm -f *.swp *.o *run
+	rm -f *.swp *.o *run core/*.o examples/*.o
