@@ -109,6 +109,7 @@ class BallGame : public GameState {
         void setup() {
             auto& emap = *event_map;
             al_install_keyboard();
+            std::cout << "keyboard init" << std::endl;
             al_register_event_source(event_queue, al_get_keyboard_event_source());
             emap[ALLEGRO_EVENT_KEY_DOWN] = new KeyHandler(this);
 
@@ -125,6 +126,11 @@ class BallGame : public GameState {
                 obj->set_pen(new Circle);
                 obj->add_behavior(new Ball);
             }
+        }
+
+        void destroy() {
+            al_uninstall_keyboard();
+            std::cout << "keyboard uninstalled" << std::endl;
         }
 };
 

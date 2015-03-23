@@ -1,5 +1,4 @@
-get rid of display in GameState constructor
-figure out seg_faults on close (free errors)
+fix al_shutdown_systems
 and sound addons
 create a basic game with allframe
 start making generic objects (like menu)

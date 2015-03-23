@@ -94,7 +94,6 @@ namespace allframe {
 
             virtual void on_click() = 0;
 
-
     };
 
     class MenuButton : public GameObject {

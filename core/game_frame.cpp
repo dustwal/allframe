@@ -6,11 +6,26 @@
 using namespace allframe;
 
 int allframe::init() {
-    return !al_init() || !al_init_primitives_addon();
+    int status = al_init();
+    if (!status) {
+        std::cerr << "ERROR: Allegro initialization failed" << std::endl;
+        return false;
+    }
+    std::cout << "Allegro initialized" << std::endl;
+    status = al_init_primitives_addon();
+    if (!status) {
+        std::cerr << "ERROR: Allegro primitives addon initialization failed" << std::endl;
+        return false;
+    }
+    std::cout << "Allegro primitives addon initialized" << std::endl;
+    return true;
 }
 
 int allframe::close() {
-    //al_uninstall_system();
+    std::cout << "shutting down Allegro primitives addon" << std::endl;
+    al_shutdown_primitives_addon();
+    std::cout << "shutting down Allegro" << std::endl;
+    //al_uninstall_system(); // TODO WHY DOES THIS CRASH!!
     return 0;
 }
 
@@ -23,34 +38,21 @@ void GameObject::set_pen(Pen* pen) {
 
 void TickEvent::event(ALLEGRO_EVENT& event) {
 
-    //std::cout<< "tick" << std::endl;
     // object updates
-    /*
-    for (auto it = parent->objects->begin(); it != parent->objects->end(); it++) 
-        (it->second).update();
-    */
-    for (auto it = parent->get_begin(); it != parent->get_end(); it++) {
-        //std::cout << it->first << std::endl;
+    for (auto it = parent->get_begin(); it != parent->get_end(); it++)
         (it->second)->update();
-    }
 
-    //std::cout<< "tick middle" << std::endl;
     // draw objects
-    //for (auto it = parent->objects->begin(); it != parent->objects->end(); it++) 
-    //    (it->second).draw();
-    for (auto it = parent->get_begin(); it != parent->get_end(); it++) { 
-        //std::cout << it->first << std::endl;
+    for (auto it = parent->get_begin(); it != parent->get_end(); it++) 
         (it->second)->draw();
-    }
+
     al_flip_display();
     al_clear_to_color(parent->get_color());
-    
-    //std::cout<< "tick end" << std::endl;
 
 }
 
 void CloseEvent::event(ALLEGRO_EVENT& event) {
-    std::cout << "exiting" << std::endl;
+    std::cout << "exiting game" << std::endl;
     parent->signal_close();
 }
 
@@ -78,7 +80,6 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
-    
 
     auto& evmap = *event_map;
     evmap[ALLEGRO_EVENT_DISPLAY_CLOSE] = new CloseEvent(this);
@@ -87,10 +88,11 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
 
 
 GameState::~GameState() {
-    destroy();    
+    al_destroy_event_queue(event_queue);
+    al_destroy_timer(timer);
 
     for (auto it = pens->begin(); it != pens->end(); it++)
-        delete &(*it);
+        delete *it;
 
     for (auto it = event_map->begin(); it != event_map->end(); it++)
         delete it->second;
@@ -100,10 +102,6 @@ GameState::~GameState() {
     delete pens;
     delete names_to_z;
     delete sorted_objects;
-
-    al_destroy_event_queue(event_queue);
-    al_destroy_timer(timer);
-    std::cout << "end destructor" << std::endl;
 
 }
 
@@ -141,6 +139,7 @@ std::string GameState::add_object(std::string name) {
     return name;
 }
 
+// TODO: behavior on nonexistent object??? fail or place on bottom..
 std::string GameState::add_object_topof(std::string name, std::string topof) {
     auto it = names_to_z->find(topof);
     if (it == names_to_z->end()) {
@@ -182,7 +181,6 @@ GameObject* GameState::get_object(std::string name) const {
 
 GameState* GameState::game_loop() {
     // manage events
-    //std::cout << "game_loop" << std::endl;
     ALLEGRO_EVENT event;
     std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler*>& emap = *event_map;
     al_start_timer(timer);
@@ -190,12 +188,11 @@ GameState* GameState::game_loop() {
     while (!is_close) {
         al_wait_for_event(event_queue, &event);
         ALLEGRO_EVENT_TYPE type = event.type;
-        //if (type != ALLEGRO_EVENT_TIMER)
-        //    std::cout << type << std::endl;
         if (emap.find(type) != emap.end())
             emap[event.type]->event(event);
     }
 
     al_rest(1);
+    destroy();
     return next_state;
 }

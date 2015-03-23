@@ -23,4 +23,4 @@ core/game_frame.o: core/game_frame.cpp core/game_frame.h core/game.inl
 	$(GCC) $(LIBS) $(FLAGS) -c $< -o $@
 
 clean:
-	rm -f *.swp *.o *run core/*.o examples/*.o
+	rm -f *.swp *.o *run core/*.o examples/*.o test/*.o
