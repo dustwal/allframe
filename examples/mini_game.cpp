@@ -15,7 +15,7 @@ class Circle : public Pen {
     public:
         void draw() const {
             Point pp = parent->get_position();
-            al_draw_filled_circle(pp.x,pp.y,5,Colors::random_color());
+            al_draw_filled_circle(pp.x,pp.y,10,Colors::random_color());
         }
 };
 

@@ -6,6 +6,9 @@
 
 namespace allframe {
 
+    /* Game
+     * Runs a game that starts with the Templated GameState class
+     */
     template <typename T>
     class Game {
         
@@ -29,6 +32,7 @@ namespace allframe {
                 al_destroy_display(display);
             }
 
+            // starts the game
             inline void run() {
                 display = al_create_display(width, height);
                 std::unique_ptr<GameState> state;
@@ -43,8 +47,8 @@ namespace allframe {
 
         private:
 
-            int height;
-            int width;
+            int height; // window height
+            int width;  // window width
             ALLEGRO_DISPLAY*    display;
 
             inline void check_type(GameState*) {}

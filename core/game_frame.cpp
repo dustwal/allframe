@@ -1,11 +1,12 @@
 #include <allegro5/allegro_primitives.h>
+#include <cmath>
 #include <iostream>
 
 #include "game_frame.h"
 
 using namespace allframe;
 
-int allframe::init() {
+bool allframe::init() {
     int status = al_init();
     if (!status) {
         std::cerr << "ERROR: Allegro initialization failed" << std::endl;
@@ -21,7 +22,7 @@ int allframe::init() {
     return true;
 }
 
-int allframe::close() {
+bool allframe::close() {
     std::cout << "shutting down Allegro primitives addon" << std::endl;
     al_shutdown_primitives_addon();
     std::cout << "shutting down Allegro" << std::endl;
@@ -36,8 +37,25 @@ void GameObject::set_pen(Pen* pen) {
     pencil->set_parent(this);
 }
 
-void TickEvent::event(ALLEGRO_EVENT& event) {
+void GameObject::set_global_rotation(double rotation) {
+    if (parent == NULL)
+        this->rotation = rotation;
+    else
+        this->rotation = std::fmod((4*M_PI+rotation-parent->get_global_rotation()),(2*M_PI));
+}
 
+void GameObject::set_global_position(const Point& point) {
+    if (parent == NULL) {
+        this->position = point;
+    } else {
+        Point global_pt = parent->get_global_position();
+        this->position = {point.x-global_pt.x,point.y-global_pt.y};
+    }
+}
+
+void TickEvent::event(ALLEGRO_EVENT& event) {
+    // TODO skip draw phase when dequeueing starts to lag
+    // ## look into timer.count function
     // object updates
     for (auto it = parent->get_begin(); it != parent->get_end(); it++)
         (it->second)->update();
