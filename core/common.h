@@ -96,14 +96,6 @@ namespace allframe {
 
     };
 
-    class MenuButton : public GameObject {
-        
-    };
-
-    class GameMenu : public GameState {
-
-    };
-
 };
 
 #endif

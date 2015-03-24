@@ -53,6 +53,8 @@ namespace allframe {
             GameObject* parent;
             // called on object destruction
             virtual void destroy() {}
+            // get the current game state
+            inline GameState* parent_state() { return parent->parent_state(); }
 
         private:
             std::string behavior_name = "ob_plain";
@@ -200,6 +202,9 @@ namespace allframe {
             inline void     set_position(const Point& point) { this->position = point; }
             // sets local position to place the object to the given global position
             void            set_global_position(const Point&);
+
+            inline GameObject* parent_object() { return parent; }
+            inline GameState* parent_state() { return parent_state; }
 
         protected:
 
