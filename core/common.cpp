@@ -71,7 +71,7 @@ bool OvalBounds::is_within(int x, int y) const {
     return is_within({(double)x,(double)y});
 }
 
-void Clickable::mouse_down(ALLEGRO_EVENT mouse) {
+void LeftClickable::mouse_down(ALLEGRO_EVENT& mouse) {
     Point anchor = parent->get_position();
     double x = mouse.mouse.x - anchor.x;
     double y = mouse.mouse.y - anchor.y;
@@ -80,7 +80,7 @@ void Clickable::mouse_down(ALLEGRO_EVENT mouse) {
         is_pressed = true;
 }
 
-void Clickable::mouse_up(ALLEGRO_EVENT mouse) {
+void LeftClickable::mouse_up(ALLEGRO_EVENT& mouse) {
     if (!is_pressed) return;
     is_pressed = false;
     Point anchor = parent->get_position();

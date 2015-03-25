@@ -80,19 +80,39 @@ namespace allframe {
 
     };
 
-    class Clickable : public ObjectBehavior {
+    class LeftClickable : public ObjectBehavior {
 
         public:
-            virtual ~Clickable() { delete bounds; }
+            virtual ~LeftClickable() { delete bounds; }
 
-            void mouse_down(ALLEGRO_EVENT mouse);
-            void mouse_up(ALLEGRO_EVENT mouse);
+            void mouse_down(ALLEGRO_EVENT& mouse);
+            void mouse_up(ALLEGRO_EVENT& mouse);
+
+            std::string get_name() const { return "af_clickable"; }
 
         protected:
             Bounds* bounds;
             bool    is_pressed;
 
             virtual void on_click() = 0;
+
+    };
+
+    class LeftClickEvent : public EventHandler {
+        
+        public: 
+            LeftClickEvent(GameState* parent) : EventHandler(parent) {}
+            void event(ALLEGRO_EVENT& event) {
+                if (event.mouse.button != 1) 
+                    return;
+                auto clickables = parent->get_behaviors_of_type("af_clickable");
+                for (auto it = clickables->begin(); it != clickables->end(); it++) {
+                    if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+                        ((LeftClickable*)(*it))->mouse_down(event);
+                    else
+                        ((LeftClickable*)(*it))->mouse_up(event);
+                }
+            }
 
     };
 
