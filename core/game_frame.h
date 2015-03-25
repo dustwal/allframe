@@ -44,17 +44,17 @@ namespace allframe {
             // called on object creation
             virtual void setup() {}
             // set the object that has this behavior
-            inline void set_parent(GameObject* parent) { this->parent = parent; }
+            void set_parent(GameObject*);
             // reutrn the name of this behavior
             virtual std::string get_name() const { return behavior_name; }
 
         protected:
             // to allow for groups of objects and hierarchies
             GameObject* parent;
+            GameState*  parent_state;
             // called on object destruction
             virtual void destroy() {}
             // get the current game state
-            inline GameState* parent_state() { return parent->parent_state(); }
 
         private:
             std::string behavior_name = "ob_plain";
@@ -204,7 +204,7 @@ namespace allframe {
             void            set_global_position(const Point&);
 
             inline GameObject* parent_object() { return parent; }
-            inline GameState* parent_state() { return parent_state; }
+            inline GameState* get_parent_state() { return parent_state; }
 
         protected:
 

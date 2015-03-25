@@ -30,6 +30,11 @@ bool allframe::close() {
     return 0;
 }
 
+void ObjectBehavior::set_parent(GameObject* parent) {
+    this->parent = parent;
+    this->parent_state = parent->get_parent_state();
+}
+
 void GameObject::set_pen(Pen* pen) {
     // if pens contulually set memory is not freed TODO
     parent_state->add_pen(pen);
