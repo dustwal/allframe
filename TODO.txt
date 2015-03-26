@@ -1,4 +1,5 @@
 fix al_shutdown_systems
+detect reused event handlers on shutdown
 and sound addons
 create a basic game with allframe
 start making generic objects (like menu)

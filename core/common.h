@@ -83,6 +83,7 @@ namespace allframe {
     class LeftClickable : public ObjectBehavior {
 
         public:
+            LeftClickable(Bounds* bounds) : bounds(bounds) {}
             virtual ~LeftClickable() { delete bounds; }
 
             void mouse_down(ALLEGRO_EVENT& mouse);

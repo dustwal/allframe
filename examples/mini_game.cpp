@@ -101,6 +101,18 @@ class KeyHandler : public EventHandler {
         }
 };
 
+class BallClick : public LeftClickable {
+
+    public:
+        BallClick(Bounds* bounds) : LeftClickable(bounds) {}
+
+        void on_click() {
+            std::cout << "click" << std::endl;
+            al_clear_to_color(al_map_rgb(255,255,255));
+        }
+
+};
+
 class BallGame : public GameState {
     
     public:
@@ -109,9 +121,14 @@ class BallGame : public GameState {
         void setup() {
             auto& emap = *event_map;
             al_install_keyboard();
-            std::cout << "keyboard init" << std::endl;
+            al_install_mouse();
+            std::cout << "keyboard & mouse init" << std::endl;
             al_register_event_source(event_queue, al_get_keyboard_event_source());
+            al_register_event_source(event_queue, al_get_mouse_event_source());
             emap[ALLEGRO_EVENT_KEY_DOWN] = new KeyHandler(this);
+            EventHandler* clicker = new LeftClickEvent(this);
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_DOWN] = clicker;
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_UP] = clicker;
 
             // wall
             std::string name = add_object("wall");
@@ -125,12 +142,14 @@ class BallGame : public GameState {
             if (obj != NULL) {
                 obj->set_pen(new Circle);
                 obj->add_behavior(new Ball);
+                obj->add_behavior(new BallClick(new CircleBounds(25)));
             }
         }
 
         void destroy() {
             al_uninstall_keyboard();
-            std::cout << "keyboard uninstalled" << std::endl;
+            al_uninstall_mouse();
+            std::cout << "keyboard mouse uninstalled" << std::endl;
         }
 };
 
@@ -138,7 +157,7 @@ int main() {
 
     init();
 
-    Game<BallGame> game;
+    Game<BallGame> game(525,525);
     game.run();
     close();
     
