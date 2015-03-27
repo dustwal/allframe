@@ -85,14 +85,14 @@ namespace allframe {
     class EventHandler {
         
         public:
-            EventHandler(GameState* state) : parent(state) {}
+            EventHandler() : parent(NULL) {}
             virtual ~EventHandler() {}
             // handles the event
             virtual void event(ALLEGRO_EVENT&) = 0;
+            void set_parent_state(GameState* state) { parent = state; }
 
         protected:
             GameState* parent;
-
     };
 
     /* TickEvent
@@ -100,23 +100,17 @@ namespace allframe {
      * and then draws all pens in z order.
      */
     class TickEvent : public EventHandler {
-
         public:
-            TickEvent(GameState* state) : EventHandler(state) {}
             // updates and draws
             void event(ALLEGRO_EVENT&);
-
     };
 
     /* CloseEvent
      * Signals the game to exit.
      */
     class CloseEvent : public EventHandler {
-
         public:
-            CloseEvent(GameState* state) : EventHandler(state) {}
             void event(ALLEGRO_EVENT&);
-            
     };
 
     /* GameObject

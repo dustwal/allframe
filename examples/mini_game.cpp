@@ -77,7 +77,6 @@ class Ball : public ObjectBehavior {
 
 class KeyHandler : public EventHandler {
     public:
-        KeyHandler(GameState* parent) : EventHandler(parent) {}
         void event(ALLEGRO_EVENT& event) {
             Ball* ball = (Ball*) parent->get_object("ball")->get_behavior("ball");
             switch (event.keyboard.keycode) {
@@ -125,10 +124,13 @@ class BallGame : public GameState {
             std::cout << "keyboard & mouse init" << std::endl;
             al_register_event_source(event_queue, al_get_keyboard_event_source());
             al_register_event_source(event_queue, al_get_mouse_event_source());
-            emap[ALLEGRO_EVENT_KEY_DOWN] = new KeyHandler(this);
-            EventHandler* clicker = new LeftClickEvent(this);
-            emap[ALLEGRO_EVENT_MOUSE_BUTTON_DOWN] = clicker;
-            emap[ALLEGRO_EVENT_MOUSE_BUTTON_UP] = clicker;
+            EventHandler* handles = new KeyHandler();
+            handles->set_parent_state(this);
+            emap[ALLEGRO_EVENT_KEY_DOWN] = handles;
+            handles = new LeftClickEvent();
+            handles->set_parent_state(this);
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_DOWN] = handles;
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_UP] = handles;
 
             // wall
             std::string name = add_object("wall");

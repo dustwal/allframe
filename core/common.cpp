@@ -5,6 +5,12 @@
 
 using namespace allframe;
 
+ALLEGRO_COLOR Colors::BLACK = al_map_rgb(0,0,0);
+ALLEGRO_COLOR Colors::WHITE = al_map_rgb(255,255,255);
+ALLEGRO_COLOR Colors::RED   = al_map_rgb(255,0,0);
+ALLEGRO_COLOR Colors::GREEN = al_map_rgb(0,255,0);
+ALLEGRO_COLOR Colors::BLUE  = al_map_rgb(0,0,255);
+
 ALLEGRO_COLOR Colors::random_color() {
     return al_map_rgb(std::rand()%256, std::rand()%256, std::rand()%256);
 }

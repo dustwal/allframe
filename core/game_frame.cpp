@@ -1,6 +1,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <cmath>
 #include <iostream>
+#include <unordered_set>
 
 #include "game_frame.h"
 
@@ -105,8 +106,12 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     al_register_event_source(event_queue, al_get_display_event_source(display));
 
     auto& evmap = *event_map;
-    evmap[ALLEGRO_EVENT_DISPLAY_CLOSE] = new CloseEvent(this);
-    evmap[ALLEGRO_EVENT_TIMER] = new TickEvent(this);
+    EventHandler* handler = new CloseEvent();
+    handler->set_parent_state(this);
+    evmap[ALLEGRO_EVENT_DISPLAY_CLOSE] = handler;
+    handler = new TickEvent();
+    handler->set_parent_state(this);
+    evmap[ALLEGRO_EVENT_TIMER] = handler;
 }
 
 
@@ -117,8 +122,13 @@ GameState::~GameState() {
     for (auto it = pens->begin(); it != pens->end(); it++)
         delete *it;
 
-    for (auto it = event_map->begin(); it != event_map->end(); it++)
-        delete it->second;
+    std::unordered_set<EventHandler*> deleted_handlers;
+    for (auto it = event_map->begin(); it != event_map->end(); it++) {
+        if (deleted_handlers.find(it->second) != deleted_handlers.end()) {
+            deleted_handlers.insert(it->second);
+            delete it->second;
+        }
+    }
 
     delete objects;
     delete event_map;
@@ -214,8 +224,6 @@ GameState* GameState::game_loop() {
         if (emap.find(type) != emap.end())
             emap[event.type]->event(event);
     }
-
-    al_rest(1);
     destroy();
     return next_state;
 }

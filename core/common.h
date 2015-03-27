@@ -8,12 +8,12 @@ namespace allframe {
     // Common colors and random generators
     namespace Colors {
 
-        const ALLEGRO_COLOR BLACK   = al_map_rgb(0,0,0);
-        const ALLEGRO_COLOR WHITE   = al_map_rgb(255,255,255);
+        extern ALLEGRO_COLOR BLACK;
+        extern ALLEGRO_COLOR WHITE;
 
-        const ALLEGRO_COLOR RED     = al_map_rgb(255,0,0);
-        const ALLEGRO_COLOR GREEN   = al_map_rgb(0,255,0);
-        const ALLEGRO_COLOR BLUE    = al_map_rgb(0,0,255);
+        extern ALLEGRO_COLOR RED;
+        extern ALLEGRO_COLOR GREEN;
+        extern ALLEGRO_COLOR BLUE;
 
         ALLEGRO_COLOR random_color();
         ALLEGRO_COLOR random_color_alpha();
@@ -31,7 +31,6 @@ namespace allframe {
             virtual bool is_within(const Point&) const = 0;
             virtual bool is_within(double x, double y) const = 0;
             virtual bool is_within(int x, int y) const = 0;
-
     };
 
     class BoxBounds : public Bounds {
@@ -53,7 +52,6 @@ namespace allframe {
             bool is_within(const Point&) const;
             bool is_within(double x, double y) const;
             bool is_within(int x, int y) const;
-
     };
 
     class CircleBounds : public Bounds {
@@ -66,7 +64,6 @@ namespace allframe {
 
         private:
             double radius;
-
     };
 
     class OvalBounds : public Bounds {
@@ -79,7 +76,6 @@ namespace allframe {
 
         private:
             Point radii;
-
     };
 
     class LeftClickable : public ObjectBehavior {
@@ -98,7 +94,6 @@ namespace allframe {
             bool    is_pressed;
 
             virtual void on_click() = 0;
-
     };
 
     class Clickable : public ObjectBehavior {
@@ -118,25 +113,21 @@ namespace allframe {
             uint64_t is_pressed; 
 
             virtual void on_click(unsigned) = 0;
-
     };
 
+    // triggers mouse_up and mouse_down of LeftCLickables
+    // only handles button #1
     class LeftClickEvent : public EventHandler {
-        
         public: 
-            LeftClickEvent(GameState* parent) : EventHandler(parent) {}
             void event(ALLEGRO_EVENT&);
-
     };
 
+    // triggers mouse_up and mouse_down of Clickables
+    // handles buttons numbered 0-15
     class ClickEvent : public EventHandler {
-
         public:
-            ClickEvent(GameState* parent) : EventHandler(parent) {}
             void event(ALLEGRO_EVENT&);
-
     };
 
 };
-
 #endif
