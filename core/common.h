@@ -23,6 +23,8 @@ namespace allframe {
     // rotates a Point double radians about the origin
     Point point_rotate(const Point&, double);
 
+    // Defines a 2-dimensional area and checks if points are
+    // within the bounds
     class Bounds {
 
         public:
@@ -33,6 +35,7 @@ namespace allframe {
             virtual bool is_within(int x, int y) const = 0;
     };
 
+    // box from origin to width,height
     class BoxBounds : public Bounds {
 
         public:
@@ -45,6 +48,7 @@ namespace allframe {
             Point size;
     };
 
+    // box from -width/2,-height/2 to width/2,height/2
     class CenterBoxBounds : public BoxBounds {
 
         public: 
@@ -54,6 +58,7 @@ namespace allframe {
             bool is_within(int x, int y) const;
     };
 
+    // bounds within a radius of the origin
     class CircleBounds : public Bounds {
 
         public:
@@ -66,6 +71,7 @@ namespace allframe {
             double radius;
     };
 
+    // elliptical bounds centered at the origin
     class OvalBounds : public Bounds {
 
         public:
@@ -78,6 +84,7 @@ namespace allframe {
             Point radii;
     };
 
+    // object with click detected by left lick event handler
     class LeftClickable : public ObjectBehavior {
 
         public:
@@ -96,6 +103,7 @@ namespace allframe {
             virtual void on_click() = 0;
     };
 
+    // class that defines behavior for multilple click buttons
     class Clickable : public ObjectBehavior {
 
         public:

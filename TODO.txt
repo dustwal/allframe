@@ -1,5 +1,5 @@
+make bounds sigleton??
 fix al_shutdown_systems
-fix Pen system... detect shared Pens..
 and sound addons
 create a basic game with allframe
 start making generic objects (like menu)
