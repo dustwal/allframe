@@ -70,12 +70,28 @@ namespace allframe {
         public:
             virtual ~Pen() {}
             // draws object on the screen
-            virtual void draw() const {}
+            virtual void draw() const = 0;
             // sets the object to draw
             inline void set_parent(GameObject* parent) { this->parent = parent; } 
 
         protected:
             GameObject* parent;
+
+    };
+
+    /* MultiPen
+     * Pen that combines multiple other pens
+     */
+    class MultiPen : public Pen {
+
+        public:
+
+            ~MultiPen();
+            void draw() const;
+            inline void add_pen(Pen* pen);
+
+        protected:
+            std::vector<Pen*>*  pens;
 
     };
 

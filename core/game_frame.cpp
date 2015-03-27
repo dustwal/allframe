@@ -36,6 +36,23 @@ void ObjectBehavior::set_parent(GameObject* parent) {
     this->parent_state = parent->get_parent_state();
 }
 
+MultiPen::~MultiPen() {
+    for (auto it = pens->begin(); it != pens->end(); it++)
+        delete *it;
+    delete pens;
+}
+
+void MultiPen::draw() const {
+    for (auto it = pens->begin(); it != pens->end(); it++)
+        (*it)->draw();
+}
+
+void MultiPen::add_pen(Pen* pen) {
+    if (parent != NULL)
+        pen->set_parent(parent);
+    pens->push_back(pen);
+}
+
 void GameObject::set_pen(Pen* pen) {
     // if pens contulually set memory is not freed TODO
     parent_state->add_pen(pen);
