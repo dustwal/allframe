@@ -72,20 +72,59 @@ bool OvalBounds::is_within(int x, int y) const {
 }
 
 void LeftClickable::mouse_down(ALLEGRO_EVENT& mouse) {
-    Point anchor = parent->get_position();
-    double x = mouse.mouse.x - anchor.x;
-    double y = mouse.mouse.y - anchor.y;
-    Point result = point_rotate({x, y}, parent->get_rotation());
+    Point anchor = parent->get_global_position();
+    Point result =  point_rotate({mouse.mouse.x-anchor.x, mouse.mouse.y-anchor.y}, 
+                    parent->get_global_rotation());
     if (bounds->is_within(result))
         is_pressed = true;
+}
+
+void Clickable::mouse_down(ALLEGRO_EVENT& event, unsigned button) {
+    Point pp  = parent->get_global_position();
+    Point rel = point_rotate({event.mouse.x-pp.x, event.mouse.y-pp.y}, 
+                parent->get_global_rotation());
+    if (bounds->is_within(rel))
+        is_pressed |= (1 << button);
 }
 
 void LeftClickable::mouse_up(ALLEGRO_EVENT& mouse) {
     if (!is_pressed) return;
     is_pressed = false;
-    Point anchor = parent->get_position();
+    Point anchor = parent->get_global_position();
     Point result =  point_rotate({mouse.mouse.x-anchor.x, mouse.mouse.y-anchor.y}, 
-                    parent->get_rotation());
+                    parent->get_global_rotation());
     if (bounds->is_within(result))
        on_click();
+}
+
+void Clickable::mouse_up(ALLEGRO_EVENT& event, unsigned button) {
+    if (!(1 & (is_pressed >> button))) return;
+    is_pressed &= ~(1 << button);
+    Point pp  = parent->get_global_position();
+    Point rel = point_rotate({event.mouse.x-pp.x, event.mouse.y-pp.y},
+                parent->get_global_rotation()); 
+    if (bounds->is_within(rel))
+        on_click(button);
+}
+
+void LeftClickEvent::event(ALLEGRO_EVENT& event) {
+    if (event.mouse.button != 1)
+        return;
+    auto clickables = parent->get_behaviors_of_type("af_left_clickable");
+    for (auto it = clickables->begin(); it != clickables->end(); it++) {
+        if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+            ((LeftClickable*)(*it))->mouse_down(event);
+        else
+            ((LeftClickable*)(*it))->mouse_up(event);
+    }
+}
+
+void ClickEvent::event(ALLEGRO_EVENT& event) {
+    auto clickables = parent->get_behaviors_of_type("af_clickable");
+    for (auto it = clickables->begin(); it != clickables->end(); it++) {
+        if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+            ((Clickable*)(*it))->mouse_down(event, event.mouse.button);
+        else
+            ((Clickable*)(*it))->mouse_up(event, event.mouse.button);
+    }
 }

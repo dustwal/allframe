@@ -5,6 +5,7 @@
 
 namespace allframe {
 
+    // Common colors and random generators
     namespace Colors {
 
         const ALLEGRO_COLOR BLACK   = al_map_rgb(0,0,0);
@@ -19,6 +20,7 @@ namespace allframe {
 
     };
 
+    // rotates a Point double radians about the origin
     Point point_rotate(const Point&, double);
 
     class Bounds {
@@ -89,7 +91,7 @@ namespace allframe {
             void mouse_down(ALLEGRO_EVENT& mouse);
             void mouse_up(ALLEGRO_EVENT& mouse);
 
-            std::string get_name() const { return "af_clickable"; }
+            std::string get_name() const { return "af_left_clickable"; }
 
         protected:
             Bounds* bounds;
@@ -99,21 +101,39 @@ namespace allframe {
 
     };
 
+    class Clickable : public ObjectBehavior {
+
+        public:
+            Clickable() : bounds{NULL}, is_pressed(0) {}
+            virtual ~Clickable() { if (bounds != NULL) delete bounds; }
+
+            void set_bounds(Bounds* bounds);
+            void mouse_down(ALLEGRO_EVENT&, unsigned);
+            void mouse_up(ALLEGRO_EVENT&, unsigned);
+
+            std::string get_name() const { return "af_clickable"; }
+
+        protected:
+            Bounds* bounds;
+            uint64_t is_pressed; 
+
+            virtual void on_click(unsigned) = 0;
+
+    };
+
     class LeftClickEvent : public EventHandler {
         
         public: 
             LeftClickEvent(GameState* parent) : EventHandler(parent) {}
-            void event(ALLEGRO_EVENT& event) {
-                if (event.mouse.button != 1) 
-                    return;
-                auto clickables = parent->get_behaviors_of_type("af_clickable");
-                for (auto it = clickables->begin(); it != clickables->end(); it++) {
-                    if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
-                        ((LeftClickable*)(*it))->mouse_down(event);
-                    else
-                        ((LeftClickable*)(*it))->mouse_up(event);
-                }
-            }
+            void event(ALLEGRO_EVENT&);
+
+    };
+
+    class ClickEvent : public EventHandler {
+
+        public:
+            ClickEvent(GameState* parent) : EventHandler(parent) {}
+            void event(ALLEGRO_EVENT&);
 
     };
 
