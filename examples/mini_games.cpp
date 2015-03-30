@@ -5,32 +5,42 @@
 using namespace allframe;
 
 class Pong;
+class Menu;
+
+GameState* create_menu(ALLEGRO_DISPLAY*);
 
 class Ball : public ObjectBehavior {
+    public:
+        void update() {
+        
+        }
 
-    std::string get_name() const { return "game"; }
+        std::string get_name() const { return "ball"; }
 };
 
 class Player : public ObjectBehavior {
     public:
-        Player() : bounds(new BoxBounds({50,50})) {}
+        Player() : bounds(new BoxBounds({50,50})), dir(0) {}
         ~Player() { delete bounds; }
 
-        void move_down() {
+        void update() {
             Point pp = parent->get_global_position();
-            pp = {pp.x, std::min(450.0, pp.y+10)};
+            pp.y = std::max(std::min(pp.y+10*dir, 450.0), 0.0);
             parent->set_global_position(pp);
         }
 
-        void move_up() {
-            Point pp = parent->get_global_position();
-            pp = {pp.x, std::max(0.0, pp.y-10)};
-            parent->set_global_position(pp);
+        void set_dir(float val) {
+            dir += val;
+        }
+
+        void set_vel(float val) {
+            dir = val;
         }
 
         std::string get_name() const { return "player"; }
     private:
         Bounds* bounds;
+        float dir;
 };
 
 class PlayerPen : public Pen {
@@ -50,19 +60,51 @@ class KeyHandler : public EventHandler {
         void event(ALLEGRO_EVENT& event) {
             Player* p1 = (Player*) parent->get_object("player1")->get_behavior("player");
             Player* p2 = (Player*) parent->get_object("player2")->get_behavior("player");
-            switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_W:
-                    p1->move_up();
-                    break;
-                case ALLEGRO_KEY_S:
-                    p1->move_down();
-                    break;
-                case ALLEGRO_KEY_UP:
-                    p2->move_up();
-                    break;
-                case ALLEGRO_KEY_DOWN:
-                    p2->move_down();
-                    break;
+            if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+                switch (event.keyboard.keycode) {
+                    case ALLEGRO_KEY_ESCAPE:
+                        parent->signal_next_state(create_menu(parent->get_display()));
+                        break;
+                    case ALLEGRO_KEY_W:
+                        p1->set_dir(-1);
+                        break;
+                    case ALLEGRO_KEY_S:
+                        p1->set_dir(1);
+                        break;
+                    case ALLEGRO_KEY_UP:
+                        p2->set_dir(-1);
+                        break;
+                    case ALLEGRO_KEY_DOWN:
+                        p2->set_dir(1);
+                        break;
+                }
+            } else {
+                switch(event.keyboard.keycode) {
+                    case ALLEGRO_KEY_W:
+                        p1->set_dir(1);
+                        break;
+                    case ALLEGRO_KEY_S:
+                        p1->set_dir(-1);
+                        break;
+                    case ALLEGRO_KEY_UP:
+                        p2->set_dir(1);
+                        break;
+                    case ALLEGRO_KEY_DOWN:
+                        p2->set_dir(-1);
+                        break;
+                }
+            }
+        }
+};
+
+class JoystickMove : public EventHandler {
+
+    public:
+        void event(ALLEGRO_EVENT& event) {
+            Player* p1 = (Player*) parent->get_object("player1")->get_behavior("player");
+            Player* p2 = (Player*) parent->get_object("player2")->get_behavior("player");
+            if (event.joystick.axis == 1) {
+                p1->set_vel(event.joystick.pos);    
             }
         }
 };
@@ -104,9 +146,11 @@ class Pong : public GameState {
         Pong(ALLEGRO_DISPLAY* display) : GameState(display) {}
         void setup() {
             auto& emap = *event_map;
+            al_install_joystick();
             al_install_keyboard();
             //al_install_mouse();
             std::cout << "keyboard & mouse install" << std::endl;
+            al_register_event_source(event_queue, al_get_joystick_event_source());
             al_register_event_source(event_queue, al_get_keyboard_event_source());
             //al_register_event_source(event_queue, al_get_mouse_event_source());
 
@@ -118,6 +162,10 @@ class Pong : public GameState {
             handles = new KeyHandler;
             handles->set_parent_state(this);
             emap[ALLEGRO_EVENT_KEY_DOWN] = handles;
+            emap[ALLEGRO_EVENT_KEY_UP] = handles;
+            handles = new JoystickMove;
+            handles->set_parent_state(this);
+            emap[ALLEGRO_EVENT_JOYSTICK_AXIS] = handles;
 
             std::string name = add_object("player1");
             GameObject* obj = get_object(name);
@@ -139,6 +187,8 @@ class Pong : public GameState {
             al_uninstall_keyboard();
         }
 };
+
+GameState* create_menu(ALLEGRO_DISPLAY* disp) { return new Menu(disp); }
 
 int main() {
     init();
