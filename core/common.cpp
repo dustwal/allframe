@@ -127,6 +127,11 @@ void LeftClickEvent::event(ALLEGRO_EVENT& event) {
     delete clickables;
 }
 
+void Clickable::set_bounds(Bounds* bounds) {
+    if (bounds != NULL) delete this->bounds;
+    this->bounds = bounds;
+}
+
 void ClickEvent::event(ALLEGRO_EVENT& event) {
     auto clickables = parent->get_behaviors_of_type("af_clickable");
     for (auto it = clickables->begin(); it != clickables->end(); it++) {
@@ -138,9 +143,9 @@ void ClickEvent::event(ALLEGRO_EVENT& event) {
     delete clickables;
 }
 
-void ButtonPen::draw() {
+void ButtonPen::draw() const {
     Point pp = parent->get_global_position();
-    al_draw_filled_rectangle(pp.x, pp.y, pp.x+100, pp.y+50, Colors::WHITE);
+    al_draw_filled_rectangle(pp.x, pp.y, pp.x+100, pp.y+50, al_map_rgb(255,255,255));
     // draw text in center
 
 }

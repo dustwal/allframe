@@ -203,12 +203,10 @@ std::string GameState::add_object_topof(std::string name, std::string topof) {
     double z = (it_now->first) + 1;
     if (it_next != sorted_objects->end())
         z = (z-1 + it_next->first) / 2.0;
-    std::cout << name << " " << z << std::endl;
     GameObject obj(this, name);
     objects->insert(std::pair<std::string, GameObject>(name, obj));
     (*names_to_z)[name] = z;
     (*sorted_objects)[z] = &(objects->find(name)->second);
-    std::cout << sorted_objects->size() << std::endl;
     return name;
 }
 

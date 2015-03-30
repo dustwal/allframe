@@ -180,7 +180,7 @@ namespace allframe {
     template<typename T>
     class StateMenuButton : public MenuButton {
         protected:
-            void on_click() {
+            void on_click(unsigned button) {
                 check_type(static_cast<T*>(0));   
                 parent_state->signal_next_state(new T(parent_state->get_display()));
             }
@@ -191,7 +191,7 @@ namespace allframe {
     // assumes a MenuButton parent
     class ButtonPen : public Pen {
         public:
-            void draw();
+            void draw() const;
     };
 
 
