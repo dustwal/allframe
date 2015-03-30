@@ -1,3 +1,4 @@
+#include <allegro5/allegro_primitives.h>
 #include <cmath>
 #include <cstdlib>
 
@@ -123,6 +124,7 @@ void LeftClickEvent::event(ALLEGRO_EVENT& event) {
         else
             ((LeftClickable*)(*it))->mouse_up(event);
     }
+    delete clickables;
 }
 
 void ClickEvent::event(ALLEGRO_EVENT& event) {
@@ -132,5 +134,33 @@ void ClickEvent::event(ALLEGRO_EVENT& event) {
             ((Clickable*)(*it))->mouse_down(event, event.mouse.button);
         else
             ((Clickable*)(*it))->mouse_up(event, event.mouse.button);
+    }
+    delete clickables;
+}
+
+void ButtonPen::draw() {
+    Point pp = parent->get_global_position();
+    al_draw_filled_rectangle(pp.x, pp.y, pp.x+100, pp.y+50, Colors::WHITE);
+    // draw text in center
+
+}
+
+void MenuStates::add_object_to_state(GameObject* object, std::string name) {
+    auto it = states->find(name);
+    if (it == states->end()) {
+        std::vector<GameObject*> new_list;
+        (*states)[name] = new_list;
+        it = states->find(name);
+    }
+    it->second.push_back(object);
+}
+
+void MenuStates::set_state(std::string menu_set) {
+    for (auto it = parent_state->get_begin(); it != parent_state->get_end(); it++) {
+        it->second->set_visibility(false);
+    }
+    auto objs = (*states)[menu_set];
+    for (auto it = objs.begin(); it != objs.end(); it++) {
+        (*it)->set_visibility(true);
     }
 }

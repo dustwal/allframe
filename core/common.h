@@ -33,6 +33,8 @@ namespace allframe {
             virtual bool is_within(const Point&) const = 0;
             virtual bool is_within(double x, double y) const = 0;
             virtual bool is_within(int x, int y) const = 0;
+
+            virtual Point center()=0;
     };
 
     // box from origin to width,height
@@ -43,6 +45,8 @@ namespace allframe {
             bool is_within(const Point&) const;
             bool is_within(double x, double y) const;
             bool is_within(int x, int y) const;
+
+            inline Point center() { return {size.x/2, size.y/2}; }
 
         protected:
             Point size;
@@ -56,6 +60,8 @@ namespace allframe {
             bool is_within(const Point&) const;
             bool is_within(double x, double y) const;
             bool is_within(int x, int y) const;
+
+            inline Point center () { return {0,0}; }
     };
 
     // bounds within a radius of the origin
@@ -66,6 +72,8 @@ namespace allframe {
             bool is_within(const Point&) const;
             bool is_within(double x, double y) const;
             bool is_within(int x, int y) const;
+
+            inline Point center() { return {0,0}; }
 
         private:
             double radius;
@@ -79,6 +87,8 @@ namespace allframe {
             bool is_within(const Point&) const;
             bool is_within(double x, double y) const;
             bool is_within(int x, int y) const;
+
+            inline Point center() { return {0,0}; }
 
         private:
             Point radii;
@@ -136,6 +146,54 @@ namespace allframe {
         public:
             void event(ALLEGRO_EVENT&);
     };
+
+    class MenuStates : public ObjectBehavior {
+        public:
+            MenuStates() : states(new std::unordered_map<std::string, std::vector<GameObject*>>) {}
+            ~MenuStates() { delete states; }
+
+            inline std::string get_name() { return "af_menu_states"; }
+            void add_object_to_state(GameObject*, std::string);
+            void set_state(std::string);
+        protected:
+            std::unordered_map<std::string, std::vector<GameObject*>>* states;
+    };
+
+    class MenuButton : public Clickable {
+        public:
+            inline void set_text(std::string text) { this->text = text; }
+        protected:
+            std::string text;
+    };
+
+    class MenuMenuButton : public MenuButton {
+        public:
+            void on_click() {
+                auto states = parent_state->get_behaviors_of_type("af_menu_states");
+                if (states->size() == 1) {
+                    ((MenuStates*)(*states)[0])->set_state(parent->get_unique_name());
+                }
+                delete states;
+            }
+    };
+
+    template<typename T>
+    class StateMenuButton : public MenuButton {
+        protected:
+            void on_click() {
+                check_type(static_cast<T*>(0));   
+                parent_state->signal_next_state(new T(parent_state->get_display()));
+            }
+        private:
+            void check_type(GameState* nstate) {}
+    };
+
+    // assumes a MenuButton parent
+    class ButtonPen : public Pen {
+        public:
+            void draw();
+    };
+
 
 };
 #endif

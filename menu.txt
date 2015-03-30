@@ -1,0 +1,8 @@
+behaviors:
+    button - sends string for new menu set / sets next state
+    menu-states: 
+    
+MenuState:
+    menus: map<string, set<Objects>> - starts at string "start"
+    remove, then :Q
+add on new menu.

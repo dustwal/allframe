@@ -213,6 +213,8 @@ namespace allframe {
             // sets local position to place the object to the given global position
             void            set_global_position(const Point&);
 
+            inline void set_visibility(bool is_visible) { visible = is_visible; }
+
             inline GameObject* parent_object() { return parent; }
             inline GameState* get_parent_state() { return parent_state; }
 
@@ -270,6 +272,8 @@ namespace allframe {
             inline void add_pen(Pen* pen) { pens->push_back(pen); }
             // return the background color of the GameState
             inline ALLEGRO_COLOR get_color() { return scene_color; }
+            // return the display pointer
+            inline ALLEGRO_DISPLAY* get_display() { return display; }
             // returns an iterator to the bottom most object
             inline std::map<double, GameObject*>::iterator get_begin() { 
                 return sorted_objects->begin(); 
@@ -286,7 +290,11 @@ namespace allframe {
             inline std::map<double, GameObject*>::reverse_iterator get_rend() { 
                 return sorted_objects->rend();
             }
-
+            // signals this state to close while setting the next state
+            inline void signal_next_state(GameState* next) {
+                next_state = next;
+                signal_close();
+            }
         protected:
 
             std::unordered_map<std::string, GameObject>*    objects;        // name object map
