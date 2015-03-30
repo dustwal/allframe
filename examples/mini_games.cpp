@@ -9,23 +9,22 @@ class Menu;
 
 GameState* create_menu(ALLEGRO_DISPLAY*);
 
-class Ball : public ObjectBehavior {
+class BallPen : public Pen {
     public:
-        void update() {
-        
+        void draw() const {
+            Point pp = parent->get_global_position();
+            al_draw_filled_circle(pp.x, pp.y, 5, al_map_rgb(255,255,0));
         }
-
-        std::string get_name() const { return "ball"; }
 };
 
 class Player : public ObjectBehavior {
     public:
-        Player() : bounds(new BoxBounds({50,50})), dir(0) {}
+        Player() : bounds(new BoxBounds({20,50})), dir(0) {}
         ~Player() { delete bounds; }
 
         void update() {
             Point pp = parent->get_global_position();
-            pp.y = std::max(std::min(pp.y+10*dir, 450.0), 0.0);
+            pp.y = std::max(std::min(pp.y+15*dir, 450.0), 0.0);
             parent->set_global_position(pp);
         }
 
@@ -37,10 +36,55 @@ class Player : public ObjectBehavior {
             dir = val;
         }
 
+        bool collision(Point& p) {
+            Point pp = parent->get_global_position();
+            return bounds->is_within({p.x-pp.x, p.y-pp.y});
+        }
+
         std::string get_name() const { return "player"; }
     private:
         Bounds* bounds;
         float dir;
+};
+
+class Ball : public ObjectBehavior {
+    public:
+        void setup() {
+            velocity = {-5,-5};
+        }
+        void update() {
+            Point pp = parent->get_global_position();
+            pp.x += velocity.x;
+            pp.y += velocity.y;
+            if (pp.y <= 0) { 
+                pp.y = 0;
+                velocity.y = -velocity.y;
+            } else if (pp.y >= 500) {
+                pp.y = 500;
+                velocity.y = -velocity.y;
+            }
+            if (pp.x <= 0 || pp.x >= 500) {
+                pp.x = 250;
+                pp.y = 250;
+                velocity.x = 5;
+                velocity.y = 5;
+            }
+            Player* p1 = (Player*) parent_state->get_object("player1")->get_behavior("player");
+            Player* p2 = (Player*) parent_state->get_object("player2")->get_behavior("player");
+            if (p1->collision(pp)) {
+                pp.x = 55;
+                velocity.x *= -1.25;
+            } else if (p2->collision(pp)) {
+                pp.x = 445;
+                velocity.x *= -1.25;
+            }
+            parent->set_global_position(pp);
+        }
+
+        std::string get_name() const { return "ball"; }
+    private:
+        Point velocity;
+
 };
 
 class PlayerPen : public Pen {
@@ -48,7 +92,7 @@ class PlayerPen : public Pen {
         PlayerPen(bool first) : is_p1(first) {}
         void draw() const {
             Point pp = parent->get_global_position();
-            if (is_p1) pp.x += 40;
+            if (is_p1) pp.x += 10;
             al_draw_filled_rectangle(pp.x, pp.y, pp.x+10, pp.y+50, al_map_rgb(0,255,0));
         }
     private:
@@ -172,7 +216,7 @@ class Pong : public GameState {
             if (obj != NULL) {
                 obj->set_pen(new PlayerPen(true));
                 obj->add_behavior(new Player);
-                obj->set_position({0, 200});
+                obj->set_position({30, 200});
             }
             name = add_object("player2");
             obj = get_object(name);
@@ -180,6 +224,13 @@ class Pong : public GameState {
                 obj->set_pen(new PlayerPen(false));
                 obj->add_behavior(new Player);
                 obj->set_position({450, 200});
+            }
+            name = add_object("ball");
+            obj = get_object(name);
+            if (obj != NULL) {
+                obj->set_pen(new BallPen);
+                obj->add_behavior(new Ball);
+                obj->set_position({250,250});
             }
         }
 
