@@ -245,7 +245,7 @@ namespace allframe {
 
         public:
 
-            static constexpr float FRAME_RATE = 30.0f;
+            static constexpr float FRAME_RATE = 60.0f;
 
             GameState(ALLEGRO_DISPLAY*);
             ~GameState();
