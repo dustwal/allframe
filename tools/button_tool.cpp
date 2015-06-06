@@ -13,13 +13,13 @@ class JoystickAxis : public EventHandler {
                 std::cout<< "\taxis: " << event.joystick.axis << std::endl;
                 std::cout<< "\tpos: " << event.joystick.pos << std::endl;
             } else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN) {
-                std::cout << "joystick button down:" << std::endl;
-                std::cout << "id:" << event.joystick.id << std::endl;
-                std::cout << "button:" << event.joystick.button << std::endl;
+                std::cout << "joystick button down: " << std::endl;
+                std::cout << "id: " << event.joystick.id << std::endl;
+                std::cout << "button: " << event.joystick.button << std::endl;
             } else if (event.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP) {
-                std::cout << "joystick button up:" << std::endl;
-                std::cout << "id:" << event.joystick.id << std::endl;
-                std::cout << "button:" << event.joystick.button << std::endl;
+                std::cout << "joystick button up: " << std::endl;
+                std::cout << "id: " << event.joystick.id << std::endl;
+                std::cout << "button: " << event.joystick.button << std::endl;
             }
         }
 };
