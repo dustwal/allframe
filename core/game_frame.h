@@ -36,6 +36,10 @@ namespace allframe {
     class ObjectBehavior {
 
         public:
+            // to allow for groups of objects and hierarchies
+            GameObject* parent;
+            GameState*  parent_state;
+
             ObjectBehavior() : parent(NULL) {}
             virtual ~ObjectBehavior() { destroy(); }
 
@@ -45,20 +49,14 @@ namespace allframe {
             virtual void setup() {}
             // set the object that has this behavior
             void set_parent(GameObject*);
+            // get parent object
+            inline GameObject* get_parent() { return parent; }
             // reutrn the name of this behavior
-            virtual std::string get_name() const { return behavior_name; }
+            virtual std::string get_name() const { return "ob_plain"; }
 
         protected:
-            // to allow for groups of objects and hierarchies
-            GameObject* parent;
-            GameState*  parent_state;
             // called on object destruction
             virtual void destroy() {}
-            // get the current game state
-
-        private:
-            std::string behavior_name = "ob_plain";
-
     };
 
     /* Pen
@@ -73,8 +71,9 @@ namespace allframe {
             virtual void draw() const = 0;
             // sets the object to draw
             inline void set_parent(GameObject* parent) { this->parent = parent; } 
+            // get parent object
+            inline GameObject* get_parent() { return parent; }
 
-        protected:
             GameObject* parent;
 
     };
@@ -91,6 +90,8 @@ namespace allframe {
             inline void add_pen(Pen* pen);
 
         protected:
+            // vector of pens to be drawn for the object
+            // protected to hide implementation
             std::vector<Pen*>*  pens;
 
     };
@@ -107,7 +108,6 @@ namespace allframe {
             virtual void event(ALLEGRO_EVENT&) = 0;
             void set_parent_state(GameState* state) { parent = state; }
 
-        protected:
             GameState* parent;
     };
 
@@ -138,15 +138,15 @@ namespace allframe {
         public:
 
             GameObject(GameState* parent_state, std::string name) : 
-                name(name), behaviors(new std::unordered_map<std::string, ObjectBehavior*>), 
-                parent(NULL), parent_state(parent_state), visible(true), pencil(NULL) {}
+                parent(NULL), parent_state(parent_state), visible(true), name(name), 
+                behaviors(new std::unordered_map<std::string, ObjectBehavior*>), pencil(NULL) {}
             
             GameObject(const GameObject& other) : 
+                parent(other.parent), parent_state(other.parent_state),
+                position(other.position), rotation(other.rotation), visible(other.visible), 
                 name(other.name), 
                 behaviors(new std::unordered_map<std::string, ObjectBehavior*>),
-                parent(other.parent), parent_state(other.parent_state),
-                position(other.position), rotation(other.rotation), 
-                visible(other.visible), pencil(other.pencil) {
+                pencil(other.pencil) {
                 for (auto it = other.behaviors->begin(); it != other.behaviors->end(); it++)
                     behaviors->insert(*it);
             }
@@ -218,15 +218,16 @@ namespace allframe {
             inline GameObject* parent_object() { return parent; }
             inline GameState* get_parent_state() { return parent_state; }
 
-        protected:
-
-            std::string                                         name;           // object name
-            std::unordered_map<std::string, ObjectBehavior*>*   behaviors;      // all behaviors
             GameObject*                                         parent;         // parent object
             GameState*                                          parent_state;   // parent state
             Point                                               position;       // local positon
             double                                              rotation;       // local rotation
             bool                                                visible;        // true if visible
+
+        protected:
+
+            std::string                                         name;           // object name
+            std::unordered_map<std::string, ObjectBehavior*>*   behaviors;      // all behaviors
             Pen*                                                pencil;         // pencil object
 
     };
@@ -295,6 +296,10 @@ namespace allframe {
                 next_state = next;
                 signal_close();
             }
+
+            GameState*                                      next_state;     // return on exit
+            ALLEGRO_COLOR                                   scene_color;    // default scene color
+
         protected:
 
             std::unordered_map<std::string, GameObject>*    objects;        // name object map
@@ -304,10 +309,8 @@ namespace allframe {
             ALLEGRO_EVENT_QUEUE*                            event_queue;
             ALLEGRO_TIMER*                                  timer;
             bool                                            is_close;       // true on close
-            GameState*                                      next_state;     // return on exit
             std::unordered_map<ALLEGRO_EVENT_TYPE,EventHandler*>* 
                 event_map;      // map from event type to handler object
-            ALLEGRO_COLOR                                   scene_color;    // default scene color
             std::vector<Pen*>*                              pens;           // list of Pens used
             
             // override functions

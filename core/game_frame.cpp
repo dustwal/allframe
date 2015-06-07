@@ -48,8 +48,14 @@ void MultiPen::draw() const {
 }
 
 void MultiPen::add_pen(Pen* pen) {
+    if (pen == NULL) { 
+        std::cerr << "WARNING: in MultiPen::add_pen(Pen*): added NULL pen" << std::endl;
+        return;
+    }
     if (parent != NULL)
         pen->set_parent(parent);
+    else
+        std::cerr << "WARNING: in MultiPen::add_pen(Pen*): adding pen before parent set" << std::endl;
     pens->push_back(pen);
 }
 
@@ -98,6 +104,8 @@ void CloseEvent::event(ALLEGRO_EVENT& event) {
 }
 
 GameState::GameState(ALLEGRO_DISPLAY* display) :
+    next_state(NULL), 
+    scene_color(al_map_rgb(0,0,0)),
     objects(new std::unordered_map<std::string, GameObject>), 
     names_to_z(new std::unordered_map<std::string, double>),
     sorted_objects(new std::map<double, GameObject*>),
@@ -105,9 +113,7 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     event_queue(al_create_event_queue()), 
     timer(al_create_timer(1.0/GameState::FRAME_RATE)),
     is_close(false), 
-    next_state(NULL), 
     event_map(new std::unordered_map<ALLEGRO_EVENT_TYPE, EventHandler*>),
-    scene_color(al_map_rgb(0,0,0)),
     pens(new std::vector<Pen*>) {
     
     if (event_queue == NULL) {
