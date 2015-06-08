@@ -1,6 +1,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <unordered_set>
 
 #include "game_frame.h"
