@@ -35,6 +35,25 @@ class KeyboardHandle : public EventHandler {
         }
 };
 
+class MouseHandle : public EventHandler {
+
+    public:
+        void event(ALLEGRO_EVENT& event) {
+            if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                std::cout << "mouse down: \n";
+		std::cout << "x: " << event.mouse.x;
+		std::cout << "; y: " << event.mouse.y;
+		std::cout << "\nbutton: " << event.mouse.button << std::endl;
+            } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
+                std::cout << "mouse up: \n";
+		std::cout << "x: " << event.mouse.x;
+		std::cout << "; y: " << event.mouse.y;
+		std::cout << "\nbutton: " << event.mouse.button << std::endl;
+            }
+        }
+
+};
+
 class VisualInput : public GameState {
     public:
         VisualInput(ALLEGRO_DISPLAY* display) : GameState(display) {}
@@ -42,9 +61,10 @@ class VisualInput : public GameState {
             auto& emap = *event_map;
             al_install_joystick();
             al_install_keyboard();
+            al_install_mouse();
             al_register_event_source(event_queue, al_get_joystick_event_source());
             al_register_event_source(event_queue, al_get_keyboard_event_source());
-            
+            al_register_event_source(event_queue, al_get_mouse_event_source());
             EventHandler* handles = new JoystickAxis;
             handles->set_parent_state(this);
             emap[ALLEGRO_EVENT_JOYSTICK_AXIS] = handles;
@@ -53,6 +73,10 @@ class VisualInput : public GameState {
             handles = new KeyboardHandle;
             handles->set_parent_state(this);
             emap[ALLEGRO_EVENT_KEY_DOWN] = handles;
+            handles = new MouseHandle;
+            handles->set_parent_state(this);
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_DOWN] = handles;
+            emap[ALLEGRO_EVENT_MOUSE_BUTTON_UP] = handles;
         }
 };
 
