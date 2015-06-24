@@ -7,6 +7,8 @@ using namespace allframe;
 class Pong;
 class Menu;
 
+int PLAYER_SIZE = 100;
+
 GameState* create_menu(ALLEGRO_DISPLAY*);
 
 class BallPen : public Pen {
@@ -19,12 +21,11 @@ class BallPen : public Pen {
 
 class Player : public ObjectBehavior {
     public:
-        Player() : bounds(new BoxBounds({20,50})), dir(0) {}
-        ~Player() { delete bounds; }
+        Player() : dir(0) {}
 
         void update() {
             Point pp = parent->get_global_position();
-            pp.y = std::max(std::min(pp.y+15*dir, 450.0), 0.0);
+            pp.y = std::max(std::min(pp.y+15*dir, 500.0-PLAYER_SIZE), 0.0);
             parent->set_global_position(pp);
         }
 
@@ -36,24 +37,30 @@ class Player : public ObjectBehavior {
             dir = val;
         }
 
-        bool collision(Point& p) {
+        bool collision(Point& pold, Point& pnew) {
             Point pp = parent->get_global_position();
-            return bounds->is_within({p.x-pp.x, p.y-pp.y});
+            if (pold.x < pnew.x) {
+                if (pp.x < pold.x || pp.x > pnew.x) return false;
+            } else {
+                if (pp.x > pold.x || pp.x < pnew.x) return false;
+            }
+            float yval = (((pp.x+5)/pold.x)/(pnew.x-pold.x))*(pnew.y-pold.y)+pold.y;
+            return yval >= pp.y && yval <= pp.y+PLAYER_SIZE;
         }
 
         std::string get_name() const { return "player"; }
     private:
-        Bounds* bounds;
         float dir;
 };
 
 class Ball : public ObjectBehavior {
     public:
         void setup() {
-            velocity = {-5,-5};
+            velocity = {-5,0};
         }
         void update() {
             Point pp = parent->get_global_position();
+            Point ppold = pp;
             pp.x += velocity.x;
             pp.y += velocity.y;
             if (pp.y <= 0) { 
@@ -63,20 +70,20 @@ class Ball : public ObjectBehavior {
                 pp.y = 500;
                 velocity.y = -velocity.y;
             }
+            Player* p1 = (Player*) parent_state->get_object("player1")->get_behavior("player");
+            Player* p2 = (Player*) parent_state->get_object("player2")->get_behavior("player");
+            if (p1->collision(ppold, pp)) {
+                pp.x = 55;
+                velocity.x *= -1.15;
+            } else if (p2->collision(ppold, pp)) {
+                pp.x = 445;
+                velocity.x *= -1.15;
+            }
             if (pp.x <= 0 || pp.x >= 500) {
                 pp.x = 250;
                 pp.y = 250;
-                velocity.x = 5;
-                velocity.y = 5;
-            }
-            Player* p1 = (Player*) parent_state->get_object("player1")->get_behavior("player");
-            Player* p2 = (Player*) parent_state->get_object("player2")->get_behavior("player");
-            if (p1->collision(pp)) {
-                pp.x = 55;
-                velocity.x *= -1.25;
-            } else if (p2->collision(pp)) {
-                pp.x = 445;
-                velocity.x *= -1.25;
+                velocity.x = 2;
+                velocity.y = 0;
             }
             parent->set_global_position(pp);
         }
@@ -89,11 +96,9 @@ class Ball : public ObjectBehavior {
 
 class PlayerPen : public Pen {
     public:
-        PlayerPen(bool first) : is_p1(first) {}
         void draw() const {
             Point pp = parent->get_global_position();
-            if (is_p1) pp.x += 10;
-            al_draw_filled_rectangle(pp.x, pp.y, pp.x+10, pp.y+50, al_map_rgb(0,255,0));
+            al_draw_filled_rectangle(pp.x, pp.y, pp.x+10, pp.y+PLAYER_SIZE, al_map_rgb(0,255,0));
         }
     private:
         bool is_p1;
@@ -214,14 +219,14 @@ class Pong : public GameState {
             std::string name = add_object("player1");
             GameObject* obj = get_object(name);
             if (obj != NULL) {
-                obj->set_pen(new PlayerPen(true));
+                obj->set_pen(new PlayerPen);
                 obj->add_behavior(new Player);
-                obj->set_position({30, 200});
+                obj->set_position({40, 200});
             }
             name = add_object("player2");
             obj = get_object(name);
             if (obj != NULL) {
-                obj->set_pen(new PlayerPen(false));
+                obj->set_pen(new PlayerPen);
                 obj->add_behavior(new Player);
                 obj->set_position({450, 200});
             }
