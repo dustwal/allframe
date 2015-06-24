@@ -273,7 +273,7 @@ namespace allframe {
             inline void add_pen(Pen* pen) { pens->push_back(pen); }
             // adds event handler to the state
             // once added the game state will handle the free
-            void add_event_handler(EventHandler*, const std::vector<ALLEGRO_EVENT>&);
+            void add_event_handler(EventHandler*, std::vector<ALLEGRO_EVENT_TYPE>&);
             // return the background color of the GameState
             inline ALLEGRO_COLOR get_color() { return scene_color; }
             // return the display pointer
