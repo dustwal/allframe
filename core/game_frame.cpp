@@ -235,7 +235,7 @@ GameObject* GameState::get_object(std::string name) const {
 }
 
 // vector iterator contructor can be used with arrays
-void GameState::add_event_handler(EventHandler* handle, const std::vector<ALLEGRO_EVENT>& events) {
+void GameState::add_event_handler(EventHandler* handle, std::vector<ALLEGRO_EVENT>& events) {
     handle->set_parent_state(this);
     for (ALLEGRO_EVENT& event : events) {
         emap[event] = handle;
