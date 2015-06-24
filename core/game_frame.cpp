@@ -90,13 +90,14 @@ void TickEvent::event(ALLEGRO_EVENT& event) {
     for (auto it = parent->get_begin(); it != parent->get_end(); it++)
         (it->second)->update();
 
+    /*
     // draw objects
     for (auto it = parent->get_begin(); it != parent->get_end(); it++) 
         (it->second)->draw();
 
     al_flip_display();
     al_clear_to_color(parent->get_color());
-
+    */
 }
 
 void CloseEvent::event(ALLEGRO_EVENT& event) {
@@ -245,6 +246,16 @@ GameState* GameState::game_loop() {
         ALLEGRO_EVENT_TYPE type = event.type;
         if (emap.find(type) != emap.end())
             emap[event.type]->event(event);
+
+        if (al_is_event_queue_empty(event_queue)) {
+            // draw objects
+            for (auto it = get_begin(); it != get_end(); it++) 
+                (it->second)->draw();
+
+            al_flip_display();
+            al_clear_to_color(get_color());
+        }
+
     }
     destroy();
     return next_state;
