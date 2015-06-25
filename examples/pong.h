@@ -5,16 +5,29 @@ namespace pong {
 
     int player_width;
 
+    class Player;
+
     // TODO
     class ControlController : public ObjectBehavior {
 
         public:
             std::string get_name() const { return "ob_contcont"; }
 
-            // TODO
             void setup();
+            void destroy();
+
             // TODO
-            void update();
+            // int 
+            void map_player(uint64_t id, Player* player);
+            // 1 up 0 down
+            void action_axis(uint64_t id, float val);
+            void action_button(uint64_t id, bool movement, bool press);
+            //
+
+
+        private:
+            std::map<int, Player*>* player_map;
+            std::map<int, bool*>* pressed;
     };
 
     // TODO
@@ -30,17 +43,21 @@ namespace pong {
     };
 
     // TODO
+    // ALLEGRO_EVENT_JOYSTICK_AXIS
     class JoystickController : public EventHandler {
 
         public:
             // TODO
-            void event();
+            void event(ALLEGRO_EVENT&);
     };
 
     // TODO
+    // ALLEGRO_EVENT_KEY_DOWN
+    // ALLEGRO_EVENT_KEY_UP
     class KeyboardController : public EventHandler {
 
             // TODO
+            void event(ALLEGRO_EVENT&);
     };
 
     // TODO
@@ -53,8 +70,12 @@ namespace pong {
             void setup();
             // TODO
             void update();
+            // TODO val between -1 and 1
+            void set_velocity(float);
     };
 
+    // Draws the player pad
+    // player anchor is on top left
     class PlayerPen : public Pen {
 
         public:
