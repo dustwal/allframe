@@ -7,7 +7,8 @@ namespace pong {
 
     class Player;
 
-    // TODO
+    // Handles mapping of controller to player and sends movements
+    // to the game
     class ControlController : public ObjectBehavior {
 
         public:
@@ -16,18 +17,19 @@ namespace pong {
             void setup();
             void destroy();
 
-            // TODO
-            // int 
+            // int 1 -> wasd -> 2 arrows, joystick.id
             void map_player(uint64_t id, Player* player);
+            // called when the new velocity is known
             // 1 up 0 down
             void action_axis(uint64_t id, float val);
-            void action_button(uint64_t id, bool movement, bool press);
-            //
+            // called on button up / button down
+            void action_button(uint64_t id, bool movement, bool press)
 
 
         private:
-            std::map<int, Player*>* player_map;
-            std::map<int, bool*>* pressed;
+            // map 
+            std::map<uint64_t, Player*>* player_map;
+            std::map<uint64_t, bool*>* pressed;
     };
 
     // TODO
@@ -44,6 +46,8 @@ namespace pong {
 
     // TODO
     // ALLEGRO_EVENT_JOYSTICK_AXIS
+    // ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN
+    // ALLEGRO_EVENT_JOYSTICK_BUTTON_UP
     class JoystickController : public EventHandler {
 
         public:

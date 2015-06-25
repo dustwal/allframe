@@ -11,17 +11,17 @@ using namespace pong;
 // ###########
 
 // names:
-// ball -> go_ball
-// playerN -> go_pN
-// controller -> go_mom
+// ball -> go_ball : Ball
+// playerN -> go_pN : Player
+// controller -> go_mom : ControlController, PongLogic
 
 // ###########
 //  BEHAVIORS
 // ###########
 
 void ControlController::setup() {
-    player_map = new std::map<int, Player*>();
-    pressed = new std::map<int, bool*>();
+    player_map = new std::map<uint64_t, Player*>();
+    pressed = new std::map<uint64_t, bool*>();
 }
 
 void ControlController::destroy() {
@@ -40,13 +40,16 @@ void ControlController::map_player(uint64_t id, Player* player) {
 
 void ControlController::action_axis(uint64_t id, float val) {
     auto& players = *player_map;
+    if (players.find(id) == players.end()) return;
     Player* player = players[id];
     player->set_velocity(val);
 }
 
 void ControlController::action_button(uint64_t id, bool movement, bool press) {
+    auto& players = *player_map;
     auto& pmap = *pressed;
-    pmap[movement] = press;
+    if (players.find(id) == players.end()) return;
+    pmap[id][movement] = press;
     if (press) {
         Player* player = players[id];
         if (movement) player->set_velocity(1.0f);
