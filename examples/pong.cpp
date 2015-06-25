@@ -11,8 +11,8 @@ using namespace pong;
 // ###########
 
 // names:
-// ball -> go_ball : Ball
-// playerN -> go_pN : Player
+// ball -> go_ball : Ball : parent -> table
+// playerN -> go_pN : Player : parent -> table
 // table -> go_table : Table
 // controller -> go_mom : ControlController, PongLogic
 //
@@ -85,12 +85,36 @@ void Player::set_velocity(float vel) {
     else velocity = vel;
 }
 
-float get_height() {
+float Player::get_height() {
     return pix_hig;
 }
 
-float get_width() {
+float Player::get_width() {
     return pix_wid;
+}
+
+float Ball::setup() {
+    velocity = Point(0,0);
+    radius = .05f;
+    parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
+    pix_rad = radius*std::min(parent_bounds.x, parent_bounds.y);
+}
+
+float Ball::update() {
+    Point ppos = parent->position;
+    Point newpos = ppos;
+    newpos.x += velocity.x;
+    newpos.y += velocity.y;
+    double maxy = parent_bounds.y-pix_rad
+    if (newpos.y <= pix_rad || newpos.y >= maxy) {
+        velocity.y = -velocity.y;
+        if (newpos.y < pix_rad) newpos.y = pix_rad;
+        else if (newpos.y > maxy) newpos.y = maxy;
+    }
+}
+
+float Ball::get_radius() {
+    return pix_rad;
 }
 
 // ###########

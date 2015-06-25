@@ -93,23 +93,21 @@ namespace pong {
 
     };
 
-    // TODO
     class Ball : public ObjectBehavior {
 
         public:
             std::string get_name() const { return "ob_pball"; }
 
-            // TODO
             void setup();
-            // TODO
             void update();
-            // TODO
             float get_radius();
 
             Point velocity;
 
         private:
             float radius;
+            Point parent_bounds;
+            float pix_rad;
     };
 
     class BallPen : public Pen {
