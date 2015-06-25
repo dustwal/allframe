@@ -1,5 +1,6 @@
+make main timer separate from main event system to allow for user created timers.
 make bounds sigleton??
 fix al_shutdown_systems
-and sound addons
+add sound addons
 create a basic game with allframe
 start making generic objects (like menu)

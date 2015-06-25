@@ -47,11 +47,8 @@ namespace pong {
     // TODO
     // ALLEGRO_EVENT_JOYSTICK_AXIS
     // ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN
-    // ALLEGRO_EVENT_JOYSTICK_BUTTON_UP
     class JoystickController : public EventHandler {
-
         public:
-            // TODO
             void event(ALLEGRO_EVENT&);
     };
 
@@ -59,8 +56,7 @@ namespace pong {
     // ALLEGRO_EVENT_KEY_DOWN
     // ALLEGRO_EVENT_KEY_UP
     class KeyboardController : public EventHandler {
-
-            // TODO
+        public:
             void event(ALLEGRO_EVENT&);
     };
 
@@ -68,14 +64,20 @@ namespace pong {
     class Player : public ObjectBehavior {
 
         public:
-            std::string get_name() const ( return "ob_pplayer"; }
+            std::string get_name() const { return "ob_pplayer"; }
 
-            // TODO
             void setup();
-            // TODO
             void update();
-            // TODO val between -1 and 1
+            // sets the velocity val between -1 and 1
+            // checks the bounds of the float
             void set_velocity(float);
+            // TODO
+            float get_height();
+
+        private:
+            float velocity;
+            float height;
+
     };
 
     // Draws the player pad
@@ -92,12 +94,19 @@ namespace pong {
     class Ball : public ObjectBehavior {
 
         public:
-            std::string get_name() const ( return "ob_pball"; }
+            std::string get_name() const { return "ob_pball"; }
 
             // TODO
             void setup();
             // TODO
             void update();
+            // TODO
+            float get_radius();
+
+            Point velocity;
+
+        private:
+            float radius;
     };
 
     class BallPen : public Pen {
@@ -106,6 +115,23 @@ namespace pong {
             ALLEGRO_COLOR color = al_map_rgb(255,10,10);
             void draw();
 
+    };
+
+    class Table : public ObjectBehavior {
+
+        public:
+            std::string get_name() const { return "ob_ptable"; }
+
+            // TODO
+            void setup();
+        
+            Point bounds;
+    };
+
+    class TablePen : public Pen {
+        public:
+            ALLEGRO_COLOR color = al_map_rgb(10,10,10);
+            void draw();
     };
 
     // TODO

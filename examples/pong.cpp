@@ -13,6 +13,7 @@ using namespace pong;
 // names:
 // ball -> go_ball : Ball
 // playerN -> go_pN : Player
+// table -> go_table : Table
 // controller -> go_mom : ControlController, PongLogic
 
 // ###########
@@ -57,6 +58,23 @@ void ControlController::action_button(uint64_t id, bool movement, bool press) {
     } else if (!pmap[id][0] && !pmap[id][1]) {
         players[id]->set_velocity(0f);
     }
+}
+
+void Player::setup() {
+    velocity = 0f;
+}
+
+// TODO
+void Player::update() {
+    double py = parent->position.y;
+
+
+}
+
+void Player::set_velocity(float vel) {
+    if (vel > 1.0f) velocity = 1.0f;
+    else if (vel < -1.0f) velocity = -1.0f;
+    else velocity = vel;
 }
 
 // ###########
@@ -125,13 +143,19 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
 // ###########
 
 void PlayerPen::draw() {
-    Point pp = parent->get_position();
+    Point& pp = parent->get_position();
     float height = ((Player*) behave("ob_pplayer"))->get_height();
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+player_width, pp.y+height, color);
 }
 
 void BallPen::draw() {
-    Point pp = parent->get_position();
+    Point& pp = parent->get_position();
     float radius = ((Ball*) behave("ob_pball"))->get_radius();
     al_draw_filled_circle(pp.x, pp.y, radius, color);
+}
+
+void TablePen::draw() {
+    Point& pp = parent->get_position();
+    Point& bounds = ((Table*) behave("ob_ptable"))->bounds;
+    al_draw_filled_rectangle(pp.x, pp.y, pp.x+bounds.x, pp.y+bounds.y, color);
 }
