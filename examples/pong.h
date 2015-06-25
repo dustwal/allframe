@@ -1,10 +1,6 @@
 #include "../core/allframe.h"
 namespace pong {
 
-    const player_wid_rat = .05;
-
-    int player_width;
-
     class Player;
 
     // Handles mapping of controller to player and sends movements
@@ -60,7 +56,6 @@ namespace pong {
             void event(ALLEGRO_EVENT&);
     };
 
-    // TODO
     class Player : public ObjectBehavior {
 
         public:
@@ -71,12 +66,20 @@ namespace pong {
             // sets the velocity val between -1 and 1
             // checks the bounds of the float
             void set_velocity(float);
-            // TODO
             float get_height();
+            float get_width();
+
+            const float player_wid = .05f;
+            const float player_hig = .2f;
+            const float ppixel_speed = 20f;
 
         private:
             float velocity;
-            float height;
+            
+            Point parent_bounds;
+
+            float pix_hig;
+            float pix_wid;
 
     };
 

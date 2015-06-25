@@ -15,6 +15,9 @@ using namespace pong;
 // playerN -> go_pN : Player
 // table -> go_table : Table
 // controller -> go_mom : ControlController, PongLogic
+//
+// add controller last
+// add table before children
 
 // ###########
 //  BEHAVIORS
@@ -51,7 +54,7 @@ void ControlController::action_button(uint64_t id, bool movement, bool press) {
     auto& pmap = *pressed;
     if (players.find(id) == players.end()) return;
     pmap[id][movement] = press;
-    if (press) {
+    if (press) { // TODO? move on press
         Player* player = players[id];
         if (movement) player->set_velocity(1.0f);
         else player->set_velocity(-1.0f);
@@ -62,19 +65,32 @@ void ControlController::action_button(uint64_t id, bool movement, bool press) {
 
 void Player::setup() {
     velocity = 0f;
+    parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
+    pix_wid = parent_bounds.x*player_wid;
+    pix_hig = parent_bounds.y*player_hig;
 }
 
-// TODO
 void Player::update() {
     double py = parent->position.y;
-
-
+    double newy = py + ppixel_speed*velocity;
+    if (newy < 0) newy = 0;
+    double maxy = parent_bounds.y-pix_hig;
+    if (newy > maxy) newy = maxy;
+    parent->position.y = newy;
 }
 
 void Player::set_velocity(float vel) {
     if (vel > 1.0f) velocity = 1.0f;
     else if (vel < -1.0f) velocity = -1.0f;
     else velocity = vel;
+}
+
+float get_height() {
+    return pix_hig;
+}
+
+float get_width() {
+    return pix_wid;
 }
 
 // ###########
@@ -143,19 +159,21 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
 // ###########
 
 void PlayerPen::draw() {
-    Point& pp = parent->get_position();
-    float height = ((Player*) behave("ob_pplayer"))->get_height();
-    al_draw_filled_rectangle(pp.x, pp.y, pp.x+player_width, pp.y+height, color);
+    Point& pp = parent->get_global_position();
+    Player* player = (Player*) behave("ob_pplayer");
+    float height = player->get_height();
+    float widht = player->get_width();
+    al_draw_filled_rectangle(pp.x, pp.y, pp.x+width, pp.y+height, color);
 }
 
 void BallPen::draw() {
-    Point& pp = parent->get_position();
+    Point& pp = parent->get_global_position();
     float radius = ((Ball*) behave("ob_pball"))->get_radius();
     al_draw_filled_circle(pp.x, pp.y, radius, color);
 }
 
 void TablePen::draw() {
-    Point& pp = parent->get_position();
+    Point& pp = parent->get_global_position();
     Point& bounds = ((Table*) behave("ob_ptable"))->bounds;
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+bounds.x, pp.y+bounds.y, color);
 }

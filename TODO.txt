@@ -1,4 +1,5 @@
 make main timer separate from main event system to allow for user created timers.
+parent objects cant access their children???
 make bounds sigleton??
 fix al_shutdown_systems
 add sound addons
