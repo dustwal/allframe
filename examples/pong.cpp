@@ -65,25 +65,57 @@ void ControlController::action_button(uint64_t id, bool movement, bool press) {
 
 void JoystickController::event(ALLEGRO_EVENT& e) {
 
-    switch (e.joystick.axis) {
-        // case up
-        // cc.action((int64_t) e.joystick.id, true)
-        // case down
-        // cc.action((int64_t) e.joystick.id, false)
+    if (e.type == ALLEGRO_EVENT_JOYSTICK_AXIS && e.joystick.axis == 1) {
+        auto& cc = *(parent->get_object("go_mom")->get_behavior("ob_contcont"));
+        cc.action_axis((uint64_t) e.joystick.id, e.joystick.pos);
+    } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN) {
+        //TODO
     }
 
 }
 
 void KeyboardController::event(ALLEGRO_EVENT& e) {
 
-    switch (e.keyboard.keycode) {
-        case ALLEGRO_KEY_ESCAPE:
-            parent->signal_close();
-            break;
-        case ALLEGRO_KEY_W:
-        case ALLEGRO_KEY_S:
-        case ALLEGRO_KEY_UP:
-        case ALLEGRO_KEY_DOWN:
+    auto& cc = *(parent->get_object("go_mom")->get_behavior("ob_contcont"));
+    if (e.type == ALLEGRO_EVENT_KEY_DOWN) {
+        switch (e.keyboard.keycode) {
+            case ALLEGRO_KEY_ESCAPE:
+                parent->signal_close();
+                break;
+            case ALLEGRO_KEY_W:
+                cc.action_button(1, true, true);
+                break;
+            case ALLEGRO_KEY_S:
+                cc.action_button(1, false, true);
+                break;
+            case ALLEGRO_KEY_SPACE:
+                //TODO
+                break;
+            case ALLEGRO_KEY_UP:
+                cc.action_button(2, true, true);
+                break;
+            case ALLEGRO_KEY_DOWN:
+                cc.action_button(2, false, true);
+                break;
+            case ALLEGRO_KEY_RSHIFT:
+                //TODO
+                break;
+        }
+    } else if (e.type == ALLEGRO_EVENT_KEY_UP) {
+        switch (e.keyboard.keycode) {
+            case ALLEGRO_KEY_W:
+                cc.action_button(1, true, false);
+                break;
+            case ALLEGRO_KEY_S:
+                cc.action_button(1, false, false);
+                break;
+            case ALLEGRO_KEY_UP:
+                cc.action_button(2, true, false);
+                break;
+            case ALLEGRO_KEY_DOWN:
+                cc.action_button(2, false, false);
+                break;
+        }
     }
 
 }
