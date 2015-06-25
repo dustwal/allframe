@@ -73,6 +73,10 @@ namespace allframe {
             inline void set_parent(GameObject* parent) { this->parent = parent; } 
             // get parent object
             inline GameObject* get_parent() { return parent; }
+            // get behavior
+            inline ObjectBehavior* behave(std::string havior) {
+                return parent->get_behavior(havior);
+            }
 
             GameObject* parent;
 
