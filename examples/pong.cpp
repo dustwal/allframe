@@ -23,6 +23,9 @@ using namespace pong;
 
 void Pong::setup() {
 
+    FRAME_RATE = 20.0f;
+    al_hide_mouse_cursor(display);
+
     std::cout << "STATUS : installing joystick" << std::endl;
     al_install_joystick();
     al_register_event_source(event_queue, al_get_joystick_event_source());
@@ -178,6 +181,7 @@ void Ball::update() {
         if (newpos.y < pix_rad) newpos.y = pix_rad;
         else if (newpos.y > maxy) newpos.y = maxy;
     }
+    parent->position = newpos;
 }
 
 float Ball::get_radius() {
@@ -198,8 +202,6 @@ void PongLogic::setup() {
 void PongLogic::update() {
     if (registered < num_players) return;
 
-    std::cout << "payers entered" << std::endl;
-
     if (ball_ready) { //TODO add buttons
         start_ball();
         return;
@@ -210,13 +212,13 @@ void PongLogic::update() {
     auto& p2 = *((Player*) parent->parent_state->get_object("go_p2")->get_behavior("ob_pplayer"));
     auto& table = *((Table*) parent->parent_state->get_object("go_table")->get_behavior("ob_ptable"));
 
-    ball.velocity.x *= 1.01;
-    ball.velocity.y *= 1.01;
+    ball.velocity.x *= 1.001;
+    ball.velocity.y *= 1.001;
 
-    if (p1.bounds->is_within(ball.parent->position)) {
+    if (p1.bounds->is_within({ball.parent->position.x-p1.parent->position.x, ball.parent->position.y-p1.parent->position.y})) {
         ball.velocity.x = -ball.velocity.x;
         ball.parent->position.x = p1.parent->position.x+p1.get_width()+ball.get_radius();
-    } else if (p2.bounds->is_within(ball.parent->position)) {
+    } else if (p2.bounds->is_within({ball.parent->position.x-p2.parent->position.x,ball.parent->position.y-p2.parent->position.y})) {
         ball.velocity.x = -ball.velocity.x;
         ball.parent->position.x = p2.parent->position.x-ball.get_radius();
     } else if (ball.parent->position.x <= ball.get_radius()) {
@@ -224,7 +226,7 @@ void PongLogic::update() {
         if (scores[1] == 7) game_over();
         last_score = 1;
         ball_reset();
-    } else if (ball.parent->position.x >= table.bounds.y-ball.get_radius()) {
+    } else if (ball.parent->position.x >= table.bounds.x-ball.get_radius()) {
         scores[0] += 1;
         if (scores[0] == 7) game_over();
         last_score = 0;
@@ -238,16 +240,19 @@ void PongLogic::destroy() {
 }
 
 void PongLogic::action(uint64_t id) {
+    ((BallPen*) parent->parent_state->get_object("go_ball")->get_pen())->color = Colors::random_color();
     if (registered < num_players) {
         if (ids->find(id) == ids->end()) {
-            auto& cc = *((ControlController*) parent->get_behavior("ob_contcont"));
+            auto cc = (ControlController*) parent->get_behavior("ob_contcont");
             Player* player = new_player();
             if (player == NULL) {
                 std::cerr << "WARNING: problem creating player" << std::endl;
                 return;
             }
             std::cout << "STATUS : added player" << id << std::endl;
-            cc.map_player(id, player); //TODO check null
+            cc->map_player(id, player); //TODO check null
+            ids->insert(id);
+            ball_reset();
         }
     } // TODO release ball
 }
@@ -259,6 +264,7 @@ void PongLogic::ball_reset() {
     ball.parent->position.y = bbounds.y/2;
     ball.velocity.x = 0;
     ball.velocity.y = 0;
+    ball_ready = true;
 }
 
 void PongLogic::game_over() {
@@ -273,22 +279,24 @@ Player* PongLogic::new_player() {
         registered--;
         return NULL;
     }
-    obj->set_parent_object(parent->parent_state->get_object("go_mom"));
+    Table* table = (Table*) parent->parent_state->get_object("go_table")->get_behavior("ob_ptable");
+    obj->set_parent_object(table->parent);
     obj->set_pen(new PlayerPen);
     obj->add_behavior(new Player);
     if (registered % 2 == 1) 
-        obj->position.x = .1*al_get_display_width(parent->parent_state->get_display());
+        obj->position.x = .1*table->bounds.x;
     else 
-        obj->position.x = .85*al_get_display_width(parent->parent_state->get_display());
-    obj->position.y = .45*al_get_display_height(parent->parent_state->get_display());
+        obj->position.x = .85*table->bounds.x;
+    obj->position.y = .45*table->bounds.y;
     return (Player*) obj->get_behavior("ob_pplayer");
 }
 
 void PongLogic::start_ball() {
     auto& ball = *((Ball*)(parent->parent_state->get_object("go_ball")->get_behavior("ob_pball")));
-    if (last_score % 2 == 1) ball.velocity.x = 5;
-    else ball.velocity.x = -5;
-    ball.velocity.y = std::rand()*10 - 5;
+    if (last_score % 2 == 1) ball.velocity.x = 1;
+    else ball.velocity.x = -1;
+    ball.velocity.y = (std::rand()%10000)/10000.0*2.0 - 1;
+    ball_ready = false;
 }
 
 void Table::setup() {
@@ -296,8 +304,8 @@ void Table::setup() {
     int wid = al_get_display_width(parent->parent_state->get_display());
     bounds.x = .9*wid;
     bounds.y = .9*hig;
-    parent->position.x = .1*wid;
-    parent->position.y = .1*hig;
+    parent->position.x = .05*wid;
+    parent->position.y = .05*hig;
 }
 
 // ###########
@@ -309,8 +317,7 @@ void JoystickController::event(ALLEGRO_EVENT& e) {
     if (e.type == ALLEGRO_EVENT_JOYSTICK_AXIS && e.joystick.axis == 1) {
         auto& cc = *((ControlController*) parent->get_object("go_mom")->get_behavior("ob_contcont"));
         cc.action_axis((uint64_t) e.joystick.id, e.joystick.pos);
-    } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN && e.joystick.button == 1) {
-        std::cout << "DEBUG  : button press" << std::endl;
+    } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN && e.joystick.button == 0) {
         auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
         pl.action((uint64_t) e.joystick.id);
     }
@@ -334,7 +341,6 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 break;
             case ALLEGRO_KEY_SPACE:
                 pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
-                std::cout << "DEBUG  : key action" << pl << std::endl;
                 pl->action(1);
                 break;
             case ALLEGRO_KEY_UP:
@@ -345,7 +351,6 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 break;
             case ALLEGRO_KEY_RSHIFT:
                 pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
-                std::cout << "DEBUG  : key action" << pl << std::endl;
                 pl->action(2);
                 break;
         }
