@@ -62,7 +62,6 @@ namespace pong {
 
     };
 
-    // TODO
     // ALLEGRO_EVENT_JOYSTICK_AXIS
     // ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN
     class JoystickController : public EventHandler {
@@ -70,7 +69,6 @@ namespace pong {
             void event(ALLEGRO_EVENT&);
     };
 
-    // TODO
     // ALLEGRO_EVENT_KEY_DOWN
     // ALLEGRO_EVENT_KEY_UP
     class KeyboardController : public EventHandler {
