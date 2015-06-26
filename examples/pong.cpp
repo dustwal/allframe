@@ -67,11 +67,11 @@ void Pong::setup() {
     }
     obj2->add_behavior(new PongLogic);
     obj2->add_behavior(new ControlController);
-    std::out << "STATUS : done initializing" << std::endl;
+    std::cout << "STATUS : done initializing" << std::endl;
 }
 
 void Pong::destroy() {
-    std::out << "STATUS : closing game" << std::endl;
+    std::cout << "STATUS : closing game" << std::endl;
     al_uninstall_keyboard();
     al_uninstall_joystick();
 }
