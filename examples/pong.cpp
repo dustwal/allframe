@@ -241,7 +241,13 @@ void PongLogic::action(uint64_t id) {
     if (registered < num_players) {
         if (ids->find(id) == ids->end()) {
             auto& cc = *((ControlController*) parent->get_behavior("ob_contcont"));
-            cc.map_player(id, new_player()); //TODO check null
+            Player* player = new_player();
+            if (player == NULL) {
+                std::cerr << "WARNING: problem creating player" << std::endl;
+                parent->parent_state->signal_close();
+                return;
+            }
+            cc.map_player(id, player); //TODO check null
         }
     } // TODO release ball
 }
