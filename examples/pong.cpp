@@ -244,9 +244,9 @@ void PongLogic::action(uint64_t id) {
             Player* player = new_player();
             if (player == NULL) {
                 std::cerr << "WARNING: problem creating player" << std::endl;
-                parent->parent_state->signal_close();
                 return;
             }
+            std::cout << "STATUS : added player" << id << std::endl;
             cc.map_player(id, player); //TODO check null
         }
     } // TODO release ball
@@ -269,7 +269,10 @@ Player* PongLogic::new_player() {
     registered++;
     std::string name = parent->parent_state->add_object(std::string("go_p") + std::to_string(registered));
     GameObject* obj = parent->parent_state->get_object(name);
-    if (obj == NULL) return NULL;
+    if (obj == NULL) {
+        registered--;
+        return NULL;
+    }
     obj->set_parent_object(parent->parent_state->get_object("go_mom"));
     obj->set_pen(new PlayerPen);
     obj->add_behavior(new Player);
@@ -307,6 +310,7 @@ void JoystickController::event(ALLEGRO_EVENT& e) {
         auto& cc = *((ControlController*) parent->get_object("go_mom")->get_behavior("ob_contcont"));
         cc.action_axis((uint64_t) e.joystick.id, e.joystick.pos);
     } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN && e.joystick.button == 1) {
+        std::cout << "DEBUG  : button press" << std::endl;
         auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
         pl.action((uint64_t) e.joystick.id);
     }
@@ -330,6 +334,7 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 break;
             case ALLEGRO_KEY_SPACE:
                 pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
+                std::cout << "DEBUG  : key action" << pl << std::endl;
                 pl->action(1);
                 break;
             case ALLEGRO_KEY_UP:
@@ -340,6 +345,7 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 break;
             case ALLEGRO_KEY_RSHIFT:
                 pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
+                std::cout << "DEBUG  : key action" << pl << std::endl;
                 pl->action(2);
                 break;
         }
