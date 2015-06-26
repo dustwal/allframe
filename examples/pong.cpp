@@ -21,6 +21,58 @@ using namespace pong;
 // add controller last
 // add table before children
 
+void Pong::setup() {
+
+    auto& emap = *event_map;
+    std::cout << "installing joystick" << std::endl;
+    al_install_joystick();
+    al_register_event_source(event_queue, al_get_joystick_event_source());
+    std::cout << "installing keyboard" << std::endl;
+    al_install_keyboard();
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
+    ALLEGRO_EVENT_TYPE* events = {ALLEGRO_EVENT_JOYSTICK_AXIS, ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN};
+    add_event_handler(new JoystickController, std::vector<ALLEGRO_EVENT_TYPE>(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE)));
+    events[0] = ALLEGRO_EVENT_KEY_DOWN;
+    events[1] = ALLEGRO_EVENT_KEY_UP;
+    add_event_handler(new KeyboardController, std::vector<ALLEGRO_EVENT_TYPE>(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE)));
+
+    std::string name = add_object("go_table");
+    GameObject* obj = get_object(name);
+    if (obj == NULL) {
+        std::cerr << "error initializing object" << std::endl;
+        signal_close();
+        return;
+    }
+    obj->set_pen(new TablePen);
+    obj->add_behavior(new Table);
+
+    name = add_object("go_ball");
+    GameObject* obj2 = get_object(name);
+    if (obj2 == NULL) {
+        std::cerr << "error initializing object" << std::endl;
+        signal_close();
+        return;
+    }
+    obj2->set_parent_object(obj);
+    obj2->set_pen(new BallPen);
+    obj2->add_behavior(new Ball);
+
+    name = add_object("go_mom");
+    obj2 = get_object(name);
+    if (obj == NULL) {
+        std::cerr << "error initializing object" << std::endl;
+        signal_close();
+        return;
+    }
+    obj2->add_behavior(new PongLogic);
+    obj2->add_behavior(new ControlController);
+}
+
+void Pong::destroy() {
+    al_uninstall_keyboard();
+    al_uninstall_joystick();
+}
+    
 // ###########
 //  BEHAVIORS
 // ###########
@@ -105,6 +157,8 @@ float Ball::setup() {
     radius = .05f;
     parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
     pix_rad = radius*std::min(parent_bounds.x, parent_bounds.y);
+    parent->position.x = parent_bounds.x/2;
+    parent->position.y = parent_bounds.y/2;
 }
 
 float Ball::update() {
@@ -145,10 +199,10 @@ void PongLogic::update() {
         return;
     }
 
-    auto& ball = *((Ball*) parent->parent_state->get_object("ball")->get_behavior("ob_pball"));
-    auto& p1 = *((Player*) parent->parent_state->get_object("player1")->get_behavior("ob_pplayer"));
-    auto& p2 = *((Player*) parent->parent_state->get_object("player2")->get_behavior("ob_pplayer"));
-    auto& table = *((Table*) parent->parent_state->get_object("table")->get_behavior("ob_ptable"));
+    auto& ball = *((Ball*) parent->parent_state->get_object("go_ball")->get_behavior("ob_pball"));
+    auto& p1 = *((Player*) parent->parent_state->get_object("go_p1")->get_behavior("ob_pplayer"));
+    auto& p2 = *((Player*) parent->parent_state->get_object("go_p2")->get_behavior("ob_pplayer"));
+    auto& table = *((Table*) parent->parent_state->get_object("go_table")->get_behavior("ob_ptable"));
 
     ball.velocity.x *= 1.01;
     ball.velocity.y *= 1.01;
@@ -187,8 +241,8 @@ void PongLogic::action(uint64_t id) {
 }
 
 void PongLogic::ball_reset() {
-    Point bbounds = parent->parent_state->get_object("table")->get_behavior("ob_ptable")->bounds;
-    auto& ball = *((Ball*)(parent->parent_state->get_object("ball")->get_behavior("ob_pball")));
+    Point bbounds = parent->parent_state->get_object("go_table")->get_behavior("ob_ptable")->bounds;
+    auto& ball = *((Ball*)(parent->parent_state->get_object("go_ball")->get_behavior("ob_pball")));
     ball.position.x = bbounds.x/2;
     ball.position.y = bbounds.y/2;
     ball.velocity.x = 0;
@@ -201,9 +255,10 @@ void PongLogic::game_over() {
 
 Player* PongLogic::new_player() {
     registered++;
-    std::string name = parent->parent_state->add_object(std::string("player") + itoa(registered));
+    std::string name = parent->parent_state->add_object(std::string("go_p") + itoa(registered));
     GameObject* obj = parent->parent_state->get_object(name);
     if (obj == NULL) return NULL;
+    obj->set_parent_object(parent->parent_state->get_object("go_mom"));
     obj->set_pen(new PlayerPen);
     obj->add_behavior(new Player);
     if (registered % 2 == 1) 
@@ -215,7 +270,7 @@ Player* PongLogic::new_player() {
 }
 
 void PongLogic::start_ball() {
-    auto& ball = *((Ball*)(parent->parent_state->get_object("ball")->get_behavior("ob_pball")));
+    auto& ball = *((Ball*)(parent->parent_state->get_object("go_ball")->get_behavior("ob_pball")));
     if (last_score % 2 == 1) ball.velocity.x = 5;
     else ball.velocity.x = -5;
     ball.velocity.y = std::rand()*10 - 5;
@@ -236,17 +291,18 @@ void Table::setup() {
 void JoystickController::event(ALLEGRO_EVENT& e) {
 
     if (e.type == ALLEGRO_EVENT_JOYSTICK_AXIS && e.joystick.axis == 1) {
-        auto& cc = *(parent->get_object("go_mom")->get_behavior("ob_contcont"));
+        auto& cc = *((ControlController*) parent->get_object("go_mom")->get_behavior("ob_contcont"));
         cc.action_axis((uint64_t) e.joystick.id, e.joystick.pos);
-    } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN) {
-        //TODO
+    } else if (e.type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN && e.joystick.button == 1) {
+        auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
+        pl.action((uint64_t) e.joystick.id);
     }
 
 }
 
 void KeyboardController::event(ALLEGRO_EVENT& e) {
 
-    auto& cc = *(parent->get_object("go_mom")->get_behavior("ob_contcont"));
+    auto& cc = *((ControlController*) parent->get_object("go_mom")->get_behavior("ob_contcont"));
     if (e.type == ALLEGRO_EVENT_KEY_DOWN) {
         switch (e.keyboard.keycode) {
             case ALLEGRO_KEY_ESCAPE:
@@ -259,7 +315,8 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 cc.action_button(1, false, true);
                 break;
             case ALLEGRO_KEY_SPACE:
-                //TODO
+                auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
+                pl.action(1);
                 break;
             case ALLEGRO_KEY_UP:
                 cc.action_button(2, true, true);
@@ -268,7 +325,8 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 cc.action_button(2, false, true);
                 break;
             case ALLEGRO_KEY_RSHIFT:
-                //TODO
+                auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
+                pl.action(2);
                 break;
         }
     } else if (e.type == ALLEGRO_EVENT_KEY_UP) {
