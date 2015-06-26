@@ -23,10 +23,10 @@ using namespace pong;
 
 void Pong::setup() {
 
-    std::cout << "installing joystick" << std::endl;
+    std::cout << "STATUS : installing joystick" << std::endl;
     al_install_joystick();
     al_register_event_source(event_queue, al_get_joystick_event_source());
-    std::cout << "installing keyboard" << std::endl;
+    std::cout << "STATUS : installing keyboard" << std::endl;
     al_install_keyboard();
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     ALLEGRO_EVENT_TYPE events[] = {ALLEGRO_EVENT_JOYSTICK_AXIS, ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN};
@@ -40,7 +40,7 @@ void Pong::setup() {
     std::string name = add_object("go_table");
     GameObject* obj = get_object(name);
     if (obj == NULL) {
-        std::cerr << "error initializing object" << std::endl;
+        std::cerr << "ERROR  : problem initializing object" << std::endl;
         signal_close();
         return;
     }
@@ -50,7 +50,7 @@ void Pong::setup() {
     name = add_object("go_ball");
     GameObject* obj2 = get_object(name);
     if (obj2 == NULL) {
-        std::cerr << "error initializing object" << std::endl;
+        std::cerr << "ERROR  : problem initializing object" << std::endl;
         signal_close();
         return;
     }
@@ -61,15 +61,17 @@ void Pong::setup() {
     name = add_object("go_mom");
     obj2 = get_object(name);
     if (obj == NULL) {
-        std::cerr << "error initializing object" << std::endl;
+        std::cerr << "ERROR  : problem initializing object" << std::endl;
         signal_close();
         return;
     }
     obj2->add_behavior(new PongLogic);
     obj2->add_behavior(new ControlController);
+    std::out << "STATUS : done initializing" << std::endl;
 }
 
 void Pong::destroy() {
+    std::out << "STATUS : closing game" << std::endl;
     al_uninstall_keyboard();
     al_uninstall_joystick();
 }
@@ -156,7 +158,7 @@ float Player::get_width() {
 void Ball::setup() {
     velocity.x = 0;
     velocity.y = 0;
-    radius = .05f;
+    radius = .01f;
     parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
     pix_rad = radius*std::min(parent_bounds.x, parent_bounds.y);
     parent->position.x = parent_bounds.x/2;
@@ -195,6 +197,8 @@ void PongLogic::setup() {
 
 void PongLogic::update() {
     if (registered < num_players) return;
+
+    std::cout << "payers entered" << std::endl;
 
     if (ball_ready) { //TODO add buttons
         start_ball();
