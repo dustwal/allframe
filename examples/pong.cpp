@@ -2,6 +2,8 @@
 // Dustin Walde 2015
 // Two player pong with controllers or keyboard
 
+#include <cmath>
+
 #include "pong.h"
 
 using namespace pong;
@@ -68,6 +70,7 @@ void Player::setup() {
     parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
     pix_wid = parent_bounds.x*player_wid;
     pix_hig = parent_bounds.y*player_hig;
+    bounds = new BoxBounds(Point(wid, hig));
 }
 
 void Player::update() {
@@ -77,6 +80,10 @@ void Player::update() {
     double maxy = parent_bounds.y-pix_hig;
     if (newy > maxy) newy = maxy;
     parent->position.y = newy;
+}
+
+void Player::destroy() {
+    delete bounds;
 }
 
 void Player::set_velocity(float vel) {
@@ -103,6 +110,8 @@ float Ball::setup() {
 float Ball::update() {
     Point ppos = parent->position;
     Point newpos = ppos;
+    if (velocity.x > max_v) velocity.x = max_v;
+    if (velocity.y > max_v) velocity.y = max_v;
     newpos.x += velocity.x;
     newpos.y += velocity.y;
     double maxy = parent_bounds.y-pix_rad
@@ -115,6 +124,109 @@ float Ball::update() {
 
 float Ball::get_radius() {
     return pix_rad;
+}
+
+void PongLogic::setup() {
+    num_players = 2;
+    registered = 0;
+    scores = new int[2];
+    scores[0] = 0;
+    scores[1] = 0;
+    last_scored = 10;
+    ids = new std::set<uint64_t>();
+    ball_ready = false;
+}
+
+void PongLogic::update() {
+    if (registered < num_players) return;
+
+    if (ball_ready) { //TODO add buttons
+        start_ball();
+        return;
+    }
+
+    auto& ball = *((Ball*) parent->parent_state->get_object("ball")->get_behavior("ob_pball"));
+    auto& p1 = *((Player*) parent->parent_state->get_object("player1")->get_behavior("ob_pplayer"));
+    auto& p2 = *((Player*) parent->parent_state->get_object("player2")->get_behavior("ob_pplayer"));
+    auto& table = *((Table*) parent->parent_state->get_object("table")->get_behavior("ob_ptable"));
+
+    ball.velocity.x *= 1.01;
+    ball.velocity.y *= 1.01;
+
+    if (p1.bounds.is_within(ball.position)) {
+        ball.velocity.x = -ball.velocity.x;
+        ball.position.x = p1.position.x+p1.get_width()+ball.get_radius();
+    } else if (p2.bounds.is_within(ball.position)) {
+        ball.velocity.x = -ball.velocity.x;
+        ball.position.x = p2.position.x-ball.get_radius();
+    } else if (ball.position.x <= ball.get_radius()) {
+        scores[1] += 1;
+        if (scores[1] == 7) game_over();
+        last_score = 1;
+        ball_reset();
+    } else if (ball.position.x >= table.bounds.y-ball.get_radius()) {
+        scores[0] += 1;
+        if (scores[0] == 7) game_over();
+        last_score = 0;
+        ball_reset();
+    }
+}
+
+void PongLogic::destroy() {
+    delete scores;
+    delete ids;
+}
+
+void PongLogic::action(uint64_t id) {
+    if (registered < num_players) {
+        if (ids->find(id) == ids->end()) {
+            auto& cc = *((ControlController*) parent->get_behavior("ob_contcont"));
+            cc.map_player(id, new_player()); //TODO check null
+        }
+    } // TODO release ball
+}
+
+void PongLogic::ball_reset() {
+    Point bbounds = parent->parent_state->get_object("table")->get_behavior("ob_ptable")->bounds;
+    auto& ball = *((Ball*)(parent->parent_state->get_object("ball")->get_behavior("ob_pball")));
+    ball.position.x = bbounds.x/2;
+    ball.position.y = bbounds.y/2;
+    ball.velocity.x = 0;
+    ball.velocity.y = 0;
+}
+
+void PongLogic::game_over() {
+    parent->parent_state->signal_close();
+}
+
+Player* PongLogic::new_player() {
+    registered++;
+    std::string name = parent->parent_state->add_object(std::string("player") + itoa(registered));
+    GameObject* obj = parent->parent_state->get_object(name);
+    if (obj == NULL) return NULL;
+    obj->set_pen(new PlayerPen);
+    obj->add_behavior(new Player);
+    if (registered % 2 == 1) 
+        obj->position.x = .1*al_get_display_width(parent->parent_state->get_display());
+    else 
+        obj->position.x = .85*al_get_display_width(parent->parent_state->get_display());
+    obj->position.y = .45*al_get_display_height(parent->parent_state->get_display());
+    return (Player*) obj->get_behavior("ob_pplayer");
+}
+
+void PongLogic::start_ball() {
+    auto& ball = *((Ball*)(parent->parent_state->get_object("ball")->get_behavior("ob_pball")));
+    if (last_score % 2 == 1) ball.velocity.x = 5;
+    else ball.velocity.x = -5;
+    ball.velocity.y = std::rand()*10 - 5;
+}
+
+void Table::setup() {
+    int hig = al_get_display_height(parent->parent_state->get_display());
+    int wid = al_get_display_width(parent->parent_state->get_display());
+    bounds = Point(.9f*wid, .9f*hig);
+    parent->position.x = .1*wid;
+    parent->position.y = .1*hig;
 }
 
 // ###########

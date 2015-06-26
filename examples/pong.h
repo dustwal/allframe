@@ -1,4 +1,12 @@
+// pong.h
+// Dustin Walde 2015
+
+#include <map>
+#include <set>
+
 #include "../core/allframe.h"
+
+
 namespace pong {
 
     class Player;
@@ -28,16 +36,30 @@ namespace pong {
             std::map<uint64_t, bool*>* pressed;
     };
 
-    // TODO
     class PongLogic : public ObjectBehavior {
 
         public:
             std::string get_name() const { return "ob_ponglogic"; }
 
-            // TODO
             void setup();
-            // TODO
             void update();
+            void destroy();
+            void action(int64_t);
+
+        private:
+
+            void ball_reset();
+            void game_over();
+            Player* new_player();
+            void start_ball();
+
+            int num_players;
+            int registered;
+            std::set<uint64_t>* ids;
+            int* scores;
+            uint8_t last_score;
+            bool ball_ready;
+
     };
 
     // TODO
@@ -73,6 +95,8 @@ namespace pong {
             const float player_hig = .2f;
             const float ppixel_speed = 20f;
 
+            Bounds* bounds;
+
         private:
             float velocity;
             
@@ -103,6 +127,7 @@ namespace pong {
             float get_radius();
 
             Point velocity;
+            const double max_v = 70;
 
         private:
             float radius;
@@ -111,7 +136,6 @@ namespace pong {
     };
 
     class BallPen : public Pen {
-
         public:
             ALLEGRO_COLOR color = al_map_rgb(255,10,10);
             void draw();
@@ -119,13 +143,9 @@ namespace pong {
     };
 
     class Table : public ObjectBehavior {
-
         public:
             std::string get_name() const { return "ob_ptable"; }
-
-            // TODO
             void setup();
-        
             Point bounds;
     };
 
