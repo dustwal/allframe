@@ -68,15 +68,13 @@ namespace allframe {
         public:
             virtual ~Pen() {}
             // draws object on the screen
-            virtual void draw() const = 0;
+            virtual void draw() = 0;
             // sets the object to draw
             inline void set_parent(GameObject* parent) { this->parent = parent; } 
             // get parent object
             inline GameObject* get_parent() { return parent; }
             // get behavior
-            inline ObjectBehavior* behave(std::string havior) {
-                return parent->get_behavior(havior);
-            }
+            ObjectBehavior* behave(std::string);
 
             GameObject* parent;
 
@@ -90,7 +88,7 @@ namespace allframe {
         public:
 
             ~MultiPen();
-            void draw() const;
+            void draw();
             inline void add_pen(Pen* pen);
 
         protected:

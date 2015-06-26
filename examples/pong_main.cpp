@@ -1,10 +1,12 @@
 #include "pong.h"
 
+using namespace allframe;
+
 int main() {
 
     init();
 
-    Game<Pong> game();
+    Game<pong::Pong> game;
     game.run();
 
     close();

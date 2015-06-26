@@ -1,3 +1,6 @@
+#ifndef __PONG_H__
+#define __PONG_H__
+
 // pong.h
 // Dustin Walde 2015
 
@@ -6,6 +9,7 @@
 
 #include "../core/allframe.h"
 
+using namespace allframe;
 
 namespace pong {
 
@@ -27,7 +31,7 @@ namespace pong {
             // 1 up 0 down
             void action_axis(uint64_t id, float val);
             // called on button up / button down
-            void action_button(uint64_t id, bool movement, bool press)
+            void action_button(uint64_t id, bool movement, bool press);
 
 
         private:
@@ -44,7 +48,7 @@ namespace pong {
             void setup();
             void update();
             void destroy();
-            void action(int64_t);
+            void action(uint64_t);
 
         private:
 
@@ -83,6 +87,7 @@ namespace pong {
 
             void setup();
             void update();
+            void destroy();
             // sets the velocity val between -1 and 1
             // checks the bounds of the float
             void set_velocity(float);
@@ -91,7 +96,7 @@ namespace pong {
 
             const float player_wid = .05f;
             const float player_hig = .2f;
-            const float ppixel_speed = 20f;
+            const float ppixel_speed = 20.0f;
 
             Bounds* bounds;
 
@@ -166,3 +171,5 @@ namespace pong {
     };
 
 };
+
+#endif

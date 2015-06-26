@@ -5,7 +5,7 @@ using namespace allframe;
 class Box : public Pen {
 
     public:
-        void draw() const {
+        void draw() {
             al_draw_filled_rectangle(20,20,505,505,al_map_rgb(10,15,20));
         }
 };
@@ -13,7 +13,7 @@ class Box : public Pen {
 class Circle : public Pen {
 
     public:
-        void draw() const {
+        void draw() {
             Point pp = parent->get_position();
             al_draw_filled_circle(pp.x,pp.y,5,Colors::random_color());
         }

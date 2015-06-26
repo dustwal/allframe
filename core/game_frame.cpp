@@ -37,13 +37,17 @@ void ObjectBehavior::set_parent(GameObject* parent) {
     this->parent_state = parent->get_parent_state();
 }
 
+ObjectBehavior* Pen::behave(std::string havior) {
+    return parent->get_behavior(havior);
+}
+
 MultiPen::~MultiPen() {
     for (auto it = pens->begin(); it != pens->end(); it++)
         delete *it;
     delete pens;
 }
 
-void MultiPen::draw() const {
+void MultiPen::draw() {
     for (auto it = pens->begin(); it != pens->end(); it++)
         (*it)->draw();
 }

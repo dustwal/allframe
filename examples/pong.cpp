@@ -23,18 +23,19 @@ using namespace pong;
 
 void Pong::setup() {
 
-    auto& emap = *event_map;
     std::cout << "installing joystick" << std::endl;
     al_install_joystick();
     al_register_event_source(event_queue, al_get_joystick_event_source());
     std::cout << "installing keyboard" << std::endl;
     al_install_keyboard();
     al_register_event_source(event_queue, al_get_keyboard_event_source());
-    ALLEGRO_EVENT_TYPE* events = {ALLEGRO_EVENT_JOYSTICK_AXIS, ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN};
-    add_event_handler(new JoystickController, std::vector<ALLEGRO_EVENT_TYPE>(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE)));
+    ALLEGRO_EVENT_TYPE events[] = {ALLEGRO_EVENT_JOYSTICK_AXIS, ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN};
+    std::vector<ALLEGRO_EVENT_TYPE> v(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE));
+    add_event_handler(new JoystickController, v);
     events[0] = ALLEGRO_EVENT_KEY_DOWN;
     events[1] = ALLEGRO_EVENT_KEY_UP;
-    add_event_handler(new KeyboardController, std::vector<ALLEGRO_EVENT_TYPE>(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE)));
+    v = std::vector<ALLEGRO_EVENT_TYPE>(events, events + sizeof(events)/sizeof(ALLEGRO_EVENT_TYPE));
+    add_event_handler(new KeyboardController, v); 
 
     std::string name = add_object("go_table");
     GameObject* obj = get_object(name);
@@ -113,16 +114,16 @@ void ControlController::action_button(uint64_t id, bool movement, bool press) {
         if (movement) player->set_velocity(1.0f);
         else player->set_velocity(-1.0f);
     } else if (!pmap[id][0] && !pmap[id][1]) {
-        players[id]->set_velocity(0f);
+        players[id]->set_velocity(0.0f);
     }
 }
 
 void Player::setup() {
-    velocity = 0f;
+    velocity = 0.0f;
     parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
     pix_wid = parent_bounds.x*player_wid;
     pix_hig = parent_bounds.y*player_hig;
-    bounds = new BoxBounds(Point(wid, hig));
+    bounds = new BoxBounds({pix_wid, pix_hig});
 }
 
 void Player::update() {
@@ -152,8 +153,9 @@ float Player::get_width() {
     return pix_wid;
 }
 
-float Ball::setup() {
-    velocity = Point(0,0);
+void Ball::setup() {
+    velocity.x = 0;
+    velocity.y = 0;
     radius = .05f;
     parent_bounds = ((Table*)(parent->parent->get_behavior("ob_ptable")))->bounds;
     pix_rad = radius*std::min(parent_bounds.x, parent_bounds.y);
@@ -161,14 +163,14 @@ float Ball::setup() {
     parent->position.y = parent_bounds.y/2;
 }
 
-float Ball::update() {
+void Ball::update() {
     Point ppos = parent->position;
     Point newpos = ppos;
     if (velocity.x > max_v) velocity.x = max_v;
     if (velocity.y > max_v) velocity.y = max_v;
     newpos.x += velocity.x;
     newpos.y += velocity.y;
-    double maxy = parent_bounds.y-pix_rad
+    double maxy = parent_bounds.y-pix_rad;
     if (newpos.y <= pix_rad || newpos.y >= maxy) {
         velocity.y = -velocity.y;
         if (newpos.y < pix_rad) newpos.y = pix_rad;
@@ -186,7 +188,7 @@ void PongLogic::setup() {
     scores = new int[2];
     scores[0] = 0;
     scores[1] = 0;
-    last_scored = 10;
+    last_score = 10;
     ids = new std::set<uint64_t>();
     ball_ready = false;
 }
@@ -207,18 +209,18 @@ void PongLogic::update() {
     ball.velocity.x *= 1.01;
     ball.velocity.y *= 1.01;
 
-    if (p1.bounds.is_within(ball.position)) {
+    if (p1.bounds->is_within(ball.parent->position)) {
         ball.velocity.x = -ball.velocity.x;
-        ball.position.x = p1.position.x+p1.get_width()+ball.get_radius();
-    } else if (p2.bounds.is_within(ball.position)) {
+        ball.parent->position.x = p1.parent->position.x+p1.get_width()+ball.get_radius();
+    } else if (p2.bounds->is_within(ball.parent->position)) {
         ball.velocity.x = -ball.velocity.x;
-        ball.position.x = p2.position.x-ball.get_radius();
-    } else if (ball.position.x <= ball.get_radius()) {
+        ball.parent->position.x = p2.parent->position.x-ball.get_radius();
+    } else if (ball.parent->position.x <= ball.get_radius()) {
         scores[1] += 1;
         if (scores[1] == 7) game_over();
         last_score = 1;
         ball_reset();
-    } else if (ball.position.x >= table.bounds.y-ball.get_radius()) {
+    } else if (ball.parent->position.x >= table.bounds.y-ball.get_radius()) {
         scores[0] += 1;
         if (scores[0] == 7) game_over();
         last_score = 0;
@@ -241,10 +243,10 @@ void PongLogic::action(uint64_t id) {
 }
 
 void PongLogic::ball_reset() {
-    Point bbounds = parent->parent_state->get_object("go_table")->get_behavior("ob_ptable")->bounds;
+    Point bbounds =((Table*) parent->parent_state->get_object("go_table")->get_behavior("ob_ptable"))->bounds;
     auto& ball = *((Ball*)(parent->parent_state->get_object("go_ball")->get_behavior("ob_pball")));
-    ball.position.x = bbounds.x/2;
-    ball.position.y = bbounds.y/2;
+    ball.parent->position.x = bbounds.x/2;
+    ball.parent->position.y = bbounds.y/2;
     ball.velocity.x = 0;
     ball.velocity.y = 0;
 }
@@ -255,7 +257,7 @@ void PongLogic::game_over() {
 
 Player* PongLogic::new_player() {
     registered++;
-    std::string name = parent->parent_state->add_object(std::string("go_p") + itoa(registered));
+    std::string name = parent->parent_state->add_object(std::string("go_p") + std::to_string(registered));
     GameObject* obj = parent->parent_state->get_object(name);
     if (obj == NULL) return NULL;
     obj->set_parent_object(parent->parent_state->get_object("go_mom"));
@@ -279,7 +281,8 @@ void PongLogic::start_ball() {
 void Table::setup() {
     int hig = al_get_display_height(parent->parent_state->get_display());
     int wid = al_get_display_width(parent->parent_state->get_display());
-    bounds = Point(.9f*wid, .9f*hig);
+    bounds.x = .9*wid;
+    bounds.y = .9*hig;
     parent->position.x = .1*wid;
     parent->position.y = .1*hig;
 }
@@ -304,6 +307,7 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
 
     auto& cc = *((ControlController*) parent->get_object("go_mom")->get_behavior("ob_contcont"));
     if (e.type == ALLEGRO_EVENT_KEY_DOWN) {
+        PongLogic* pl = NULL;
         switch (e.keyboard.keycode) {
             case ALLEGRO_KEY_ESCAPE:
                 parent->signal_close();
@@ -315,8 +319,8 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 cc.action_button(1, false, true);
                 break;
             case ALLEGRO_KEY_SPACE:
-                auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
-                pl.action(1);
+                pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
+                pl->action(1);
                 break;
             case ALLEGRO_KEY_UP:
                 cc.action_button(2, true, true);
@@ -325,8 +329,8 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
                 cc.action_button(2, false, true);
                 break;
             case ALLEGRO_KEY_RSHIFT:
-                auto& pl = *((PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic"));
-                pl.action(2);
+                pl = (PongLogic*) parent->get_object("go_mom")->get_behavior("ob_ponglogic");
+                pl->action(2);
                 break;
         }
     } else if (e.type == ALLEGRO_EVENT_KEY_UP) {
@@ -353,21 +357,21 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
 // ###########
 
 void PlayerPen::draw() {
-    Point& pp = parent->get_global_position();
+    Point pp = parent->get_global_position();
     Player* player = (Player*) behave("ob_pplayer");
     float height = player->get_height();
-    float widht = player->get_width();
+    float width = player->get_width();
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+width, pp.y+height, color);
 }
 
 void BallPen::draw() {
-    Point& pp = parent->get_global_position();
+    Point pp = parent->get_global_position();
     float radius = ((Ball*) behave("ob_pball"))->get_radius();
     al_draw_filled_circle(pp.x, pp.y, radius, color);
 }
 
 void TablePen::draw() {
-    Point& pp = parent->get_global_position();
+    Point pp = parent->get_global_position();
     Point& bounds = ((Table*) behave("ob_ptable"))->bounds;
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+bounds.x, pp.y+bounds.y, color);
 }

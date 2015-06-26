@@ -13,7 +13,7 @@ GameState* create_menu(ALLEGRO_DISPLAY*);
 
 class BallPen : public Pen {
     public:
-        void draw() const {
+        void draw() {
             Point pp = parent->get_global_position();
             al_draw_filled_circle(pp.x, pp.y, 5, al_map_rgb(255,255,0));
         }
@@ -96,7 +96,7 @@ class Ball : public ObjectBehavior {
 
 class PlayerPen : public Pen {
     public:
-        void draw() const {
+        void draw() {
             Point pp = parent->get_global_position();
             al_draw_filled_rectangle(pp.x, pp.y, pp.x+10, pp.y+PLAYER_SIZE, al_map_rgb(0,255,0));
         }

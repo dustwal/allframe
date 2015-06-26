@@ -191,7 +191,7 @@ namespace allframe {
     // assumes a MenuButton parent
     class ButtonPen : public Pen {
         public:
-            void draw() const;
+            void draw();
     };
 
 

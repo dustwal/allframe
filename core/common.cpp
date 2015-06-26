@@ -143,7 +143,7 @@ void ClickEvent::event(ALLEGRO_EVENT& event) {
     delete clickables;
 }
 
-void ButtonPen::draw() const {
+void ButtonPen::draw() {
     Point pp = parent->get_global_position();
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+100, pp.y+50, al_map_rgb(255,255,255));
     // draw text in center
