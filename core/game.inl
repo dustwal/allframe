@@ -28,6 +28,11 @@ namespace allframe {
                 check_type(static_cast<T*>(0));
             }
 
+            // Gives dimensions with the specified allegro display flags
+            inline Game(int width, int height, int flags) : Game(width, height) {
+                al_set_new_display_flags(flags);
+            }
+
             inline ~Game() {
                 al_destroy_display(display);
             }
