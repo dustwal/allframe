@@ -1,5 +1,4 @@
 make object access more code friendly (no more parent->parent_state->get_object->get_behvavior) : parent_behavior(behavior), object_behavior(name, behavior)
-Allow game init option to send in display flags
 make main timer separate from main event system to allow for user created timers.
 parent objects cant access their children???
 make bounds sigleton??

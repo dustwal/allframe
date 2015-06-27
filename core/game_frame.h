@@ -52,25 +52,15 @@ namespace allframe {
             // get parent object
             inline GameObject* get_parent() { return parent; }
             // get behavior of same object
-            inline ObjectBehavior* get_behavior(std::string name) const { 
-                return parent->get_behavior(name); 
-            }
+            ObjectBehavior* get_behavior(std::string name) const;
             // get game object
-            inline GameObject get_object(std::string name) const { 
-                return parent->parent_state->get_object(name); 
-            }
+            GameObject* get_object(std::string name) const;
             // get object behavior
-            inline ObjectBehavior* object_behavior(std::string obname, std::string bname) const {
-                return parent->parent_state->get_object(obname)->get_behavior(bname);
-            }
+            ObjectBehavior* object_behavior(std::string obname, std::string bname) const;
             // returns all objects that have the given behavior
-            inline std::vector<GameObject*>* get_objects_of_behavior(std::string name) const {
-                return parent->parent_state->get_objects_of_behavior(name);
-            }
+            std::vector<GameObject*>* get_objects_of_behavior(std::string name) const;
             // returns the behaviors of the given type
-            inline std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const {
-                return parent->parent_state->get_behaviors_of_type(name);
-            }
+            std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const;
             // reutrn the name of this behavior
             virtual std::string get_name() const { return "ob_plain"; }
 
@@ -94,9 +84,7 @@ namespace allframe {
             // get parent object
             inline GameObject* get_parent() { return parent; }
             // get behavior
-            inline ObjectBehavior* get_behavior(std::string name) {
-                return parent->get_behavior(name);
-            }
+            ObjectBehavior* get_behavior(std::string name) const;
 
             GameObject* parent;
 

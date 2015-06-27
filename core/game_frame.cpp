@@ -11,23 +11,23 @@ using namespace allframe;
 bool allframe::init() {
     int status = al_init();
     if (!status) {
-        std::cerr << "ERROR: Allegro initialization failed" << std::endl;
+        std::cerr << "ERROR  : Allegro initialization failed" << std::endl;
         return false;
     }
     std::cout << "Allegro initialized" << std::endl;
     status = al_init_primitives_addon();
     if (!status) {
-        std::cerr << "ERROR: Allegro primitives addon initialization failed" << std::endl;
+        std::cerr << "ERROR  : Allegro primitives addon initialization failed" << std::endl;
         return false;
     }
-    std::cout << "Allegro primitives addon initialized" << std::endl;
+    std::cout << "STATUS : Allegro primitives addon initialized" << std::endl;
     return true;
 }
 
 bool allframe::close() {
-    std::cout << "shutting down Allegro primitives addon" << std::endl;
+    std::cout << "STATUS : shutting down Allegro primitives addon" << std::endl;
     al_shutdown_primitives_addon();
-    std::cout << "shutting down Allegro" << std::endl;
+    std::cout << "STATUS : shutting down Allegro" << std::endl;
     //al_uninstall_system(); // TODO WHY DOES THIS CRASH!!
     return 0;
 }
@@ -35,6 +35,30 @@ bool allframe::close() {
 void ObjectBehavior::set_parent(GameObject* parent) {
     this->parent = parent;
     this->parent_state = parent->get_parent_state();
+}
+
+ObjectBehavior*  ObjectBehavior::get_behavior(std::string name) const {
+    return parent->get_behavior(name);
+}
+
+GameObject* ObjectBehavior::get_object(std::string name) const {
+    return parent_state->get_object(name);
+}
+
+ObjectBehavior* ObjectBehavior::object_behavior(std::string obname, std::string bname) const {
+    return parent_state->get_object(obname)->get_behavior(bname);
+}
+
+std::vector<GameObject*>* ObjectBehavior::get_objects_of_behavior(std::string name) const {
+    return parent_state->get_objects_of_behavior(name);
+}
+
+std::vector<ObjectBehavior*>* ObjectBehavior::get_behaviors_of_type(std::string name) const {
+    return parent_state->get_behaviors_of_type(name);
+}
+
+ObjectBehavior* Pen::get_behavior(std::string name) const {
+    return parent->get_behavior(name);
 }
 
 MultiPen::~MultiPen() {
