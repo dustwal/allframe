@@ -51,6 +51,26 @@ namespace allframe {
             void set_parent(GameObject*);
             // get parent object
             inline GameObject* get_parent() { return parent; }
+            // get behavior of same object
+            inline ObjectBehavior* get_behavior(std::string name) const { 
+                return parent->get_behavior(name); 
+            }
+            // get game object
+            inline GameObject get_object(std::string name) const { 
+                return parent->parent_state->get_object(name); 
+            }
+            // get object behavior
+            inline ObjectBehavior* object_behavior(std::string obname, std::string bname) const {
+                return parent->parent_state->get_object(obname)->get_behavior(bname);
+            }
+            // returns all objects that have the given behavior
+            inline std::vector<GameObject*>* get_objects_of_behavior(std::string name) const {
+                return parent->parent_state->get_objects_of_behavior(name);
+            }
+            // returns the behaviors of the given type
+            inline std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const {
+                return parent->parent_state->get_behaviors_of_type(name);
+            }
             // reutrn the name of this behavior
             virtual std::string get_name() const { return "ob_plain"; }
 
@@ -74,7 +94,9 @@ namespace allframe {
             // get parent object
             inline GameObject* get_parent() { return parent; }
             // get behavior
-            ObjectBehavior* behave(std::string);
+            inline ObjectBehavior* get_behavior(std::string name) {
+                return parent->get_behavior(name);
+            }
 
             GameObject* parent;
 

@@ -379,7 +379,7 @@ void KeyboardController::event(ALLEGRO_EVENT& e) {
 
 void PlayerPen::draw() {
     Point pp = parent->get_global_position();
-    Player* player = (Player*) behave("ob_pplayer");
+    Player* player = (Player*) get_behavior("ob_pplayer");
     float height = player->get_height();
     float width = player->get_width();
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+width, pp.y+height, color);
@@ -387,12 +387,12 @@ void PlayerPen::draw() {
 
 void BallPen::draw() {
     Point pp = parent->get_global_position();
-    float radius = ((Ball*) behave("ob_pball"))->get_radius();
+    float radius = ((Ball*) get_behavior("ob_pball"))->get_radius();
     al_draw_filled_circle(pp.x, pp.y, radius, color);
 }
 
 void TablePen::draw() {
     Point pp = parent->get_global_position();
-    Point& bounds = ((Table*) behave("ob_ptable"))->bounds;
+    Point& bounds = ((Table*) get_behavior("ob_ptable"))->bounds;
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+bounds.x, pp.y+bounds.y, color);
 }
