@@ -1,13 +1,23 @@
+// Dustin Walde 2015
+// pong_main.cpp
+
+#include <cstdlib>
+
 #include "pong.h"
 
 using namespace allframe;
 
-int main() {
+int main(int argc, char** argv) {
 
     init();
 
-    Game<pong::Pong> game;
-    game.run();
+    if (argc < 3) {
+        Game<pong::Pong> game;
+        game.run();
+    } else {
+        Game<pong::Pong> game(std::atoi(argv[1]), std::atoi(argv[2]));
+        game.run();
+    }
 
     close();
 

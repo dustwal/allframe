@@ -94,7 +94,7 @@ namespace pong {
             float get_height();
             float get_width();
 
-            const float player_wid = .05f;
+            const float player_wid = .04f;
             const float player_hig = .2f;
             const float ppixel_speed = 20.0f;
 
@@ -154,7 +154,7 @@ namespace pong {
 
     class TablePen : public Pen {
         public:
-            ALLEGRO_COLOR color = al_map_rgb(10,10,10);
+            ALLEGRO_COLOR color = al_map_rgb(40,40,40);
             void draw();
     };
 

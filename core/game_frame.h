@@ -210,6 +210,7 @@ namespace allframe {
                     return position;
                 return {position.x+parent->position.x, position.y+parent->position.y}; 
             }
+            inline Pen*     get_pen() { return pencil; }
             // sets the local position
             inline void     set_position(const Point& point) { this->position = point; }
             // sets local position to place the object to the given global position
@@ -248,7 +249,7 @@ namespace allframe {
 
         public:
 
-            static constexpr float FRAME_RATE = 60.0f;
+            float FRAME_RATE = 60.0f;
 
             GameState(ALLEGRO_DISPLAY*);
             ~GameState();
