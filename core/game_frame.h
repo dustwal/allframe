@@ -61,6 +61,8 @@ namespace allframe {
             std::vector<GameObject*>* get_objects_of_behavior(std::string name) const;
             // returns the behaviors of the given type
             std::vector<ObjectBehavior*>* get_behaviors_of_type(std::string name) const;
+            // get position of parent object    
+            Point& get_position() const;
             // reutrn the name of this behavior
             virtual std::string get_name() const { return "ob_plain"; }
 

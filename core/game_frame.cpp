@@ -57,6 +57,10 @@ std::vector<ObjectBehavior*>* ObjectBehavior::get_behaviors_of_type(std::string 
     return parent_state->get_behaviors_of_type(name);
 }
 
+Point& ObjectBehavior::get_position() const {
+    return parent->position;
+}
+
 ObjectBehavior* Pen::get_behavior(std::string name) const {
     return parent->get_behavior(name);
 }

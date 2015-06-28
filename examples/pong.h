@@ -57,6 +57,10 @@ namespace pong {
             Player* new_player();
             void start_ball();
 
+            double speed_factor;
+            double start_speed;
+            double redirect_factor;
+
             int num_players;
             int registered;
             std::set<uint64_t>* ids;

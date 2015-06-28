@@ -194,9 +194,12 @@ void PongLogic::setup() {
     scores = new int[2];
     scores[0] = 0;
     scores[1] = 0;
-    last_score = 10;
+    last_score = std::rand();
     ids = new std::set<uint64_t>();
     ball_ready = false;
+    speed_factor = 1.25;
+    start_speed = ((Table*) object_behavior("go_table", "ob_ptable"))->bounds.x / 500.0;
+    redirect_factor = .1;
 }
 
 void PongLogic::update() {
@@ -212,15 +215,14 @@ void PongLogic::update() {
     auto& p2 = *((Player*) parent->parent_state->get_object("go_p2")->get_behavior("ob_pplayer"));
     auto& table = *((Table*) parent->parent_state->get_object("go_table")->get_behavior("ob_ptable"));
 
-    ball.velocity.x *= 1.001;
-    ball.velocity.y *= 1.001;
-
     if (p1.bounds->is_within({ball.parent->position.x-p1.parent->position.x, ball.parent->position.y-p1.parent->position.y})) {
-        ball.velocity.x = -ball.velocity.x;
+        ball.velocity.x = -speed_factor*ball.velocity.x;
         ball.parent->position.x = p1.parent->position.x+p1.get_width()+ball.get_radius();
+        ball.velocity.y += p1.get_height()*redirect_factor*(((ball.parent->position.y-p1.parent->position.y)/p1.get_height())-.5);
     } else if (p2.bounds->is_within({ball.parent->position.x-p2.parent->position.x,ball.parent->position.y-p2.parent->position.y})) {
-        ball.velocity.x = -ball.velocity.x;
+        ball.velocity.x = -speed_factor*ball.velocity.x;
         ball.parent->position.x = p2.parent->position.x-ball.get_radius();
+        ball.velocity.y += p2.get_height()*redirect_factor*(((ball.parent->position.y-p2.parent->position.y)/p2.get_height())-.5);
     } else if (ball.parent->position.x <= ball.get_radius()) {
         scores[1] += 1;
         if (scores[1] == 7) game_over();
@@ -293,9 +295,9 @@ Player* PongLogic::new_player() {
 
 void PongLogic::start_ball() {
     auto& ball = *((Ball*)(parent->parent_state->get_object("go_ball")->get_behavior("ob_pball")));
-    if (last_score % 2 == 1) ball.velocity.x = 1;
-    else ball.velocity.x = -1;
-    ball.velocity.y = (std::rand()%10000)/10000.0*2.0 - 1;
+    if (last_score % 2 == 1) ball.velocity.x = start_speed;
+    else ball.velocity.x = -start_speed;
+    ball.velocity.y = (std::rand()%10000)/10000.0*2.0*start_speed - 1;
     ball_ready = false;
 }
 
