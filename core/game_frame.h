@@ -326,6 +326,7 @@ namespace allframe {
             ALLEGRO_DISPLAY*                                display;
             ALLEGRO_EVENT_QUEUE*                            event_queue;
             ALLEGRO_TIMER*                                  timer;
+            TickEvent*                                      timer_event;
             bool                                            is_close;       // true on close
             std::unordered_map<ALLEGRO_EVENT_TYPE,EventHandler*>* 
                 event_map;      // map from event type to handler object

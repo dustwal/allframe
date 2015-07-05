@@ -162,9 +162,8 @@ GameState::GameState(ALLEGRO_DISPLAY* display) :
     EventHandler* handler = new CloseEvent();
     handler->set_parent_state(this);
     evmap[ALLEGRO_EVENT_DISPLAY_CLOSE] = handler;
-    handler = new TickEvent();
-    handler->set_parent_state(this);
-    evmap[ALLEGRO_EVENT_TIMER] = handler;
+    timer_event = new TickEvent();
+    timer_event->set_parent_state(this);
 }
 
 
@@ -183,6 +182,7 @@ GameState::~GameState() {
         }
     }
 
+    delete timer_event;
     delete objects;
     delete event_map;
     delete pens;
@@ -280,7 +280,9 @@ GameState* GameState::game_loop() {
     while (!is_close) {
         al_wait_for_event(event_queue, &event);
         ALLEGRO_EVENT_TYPE type = event.type;
-        if (emap.find(type) != emap.end())
+        if (event.type == ALLEGRO_EVENT_TIMER && event.timer.source == timer) {
+            timer_event->event(event);
+        } else if (emap.find(type) != emap.end())
             emap[event.type]->event(event);
 
         if (al_is_event_queue_empty(event_queue)) {
