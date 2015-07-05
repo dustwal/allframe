@@ -4,6 +4,8 @@
 
 #include <cmath>
 
+#include <allegro5/allegro_ttf.h>
+
 #include "pong.h"
 
 using namespace pong;
@@ -61,6 +63,34 @@ void Pong::setup() {
     obj2->set_pen(new BallPen);
     obj2->add_behavior(new Ball);
 
+    int width = al_get_display_width(display);
+    int height = al_get_display_height(display);
+    name = add_object("go_score1");
+    obj2 = get_object(name);
+    if (obj == NULL) {
+        std::cerr << "ERROR  : problem initializing object" << std::endl;
+        signal_close();
+        return;
+    }
+    obj2->set_parent_object(obj);
+    obj2->set_pen(new ScorePen);
+    obj2->add_behavior(new ScoreDisplay);
+    obj2->position.x = width*.9*.025;
+    obj2->position.y = height*.9*.025;
+
+    name = add_object("go_score2");
+    obj2 = get_object(name);
+    if (obj == NULL) {
+        std::cerr << "ERROR  : problem initializing object" << std::endl;
+        signal_close();
+        return;
+    }
+    obj2->set_parent_object(obj);
+    obj2->set_pen(new ScorePen);
+    obj2->add_behavior(new ScoreDisplay);
+    obj2->position.x = width*.9*.925;
+    obj2->position.y = height*.9*.025;
+
     name = add_object("go_mom");
     obj2 = get_object(name);
     if (obj == NULL) {
@@ -70,6 +100,7 @@ void Pong::setup() {
     }
     obj2->add_behavior(new PongLogic);
     obj2->add_behavior(new ControlController);
+
     std::cout << "STATUS : done initializing" << std::endl;
 }
 
@@ -225,11 +256,13 @@ void PongLogic::update() {
         ball.velocity.y += p2.get_height()*redirect_factor*(((ball.parent->position.y-p2.parent->position.y)/p2.get_height())-.5);
     } else if (ball.parent->position.x <= ball.get_radius()) {
         scores[1] += 1;
+        ((ScoreDisplay*) object_behavior("go_score2", "ob_pscore"))->score = scores[1];
         if (scores[1] == 7) game_over();
         last_score = 1;
         ball_reset();
     } else if (ball.parent->position.x >= table.bounds.x-ball.get_radius()) {
         scores[0] += 1;
+        ((ScoreDisplay*) object_behavior("go_score1", "ob_pscore"))->score = scores[0];
         if (scores[0] == 7) game_over();
         last_score = 0;
         ball_reset();
@@ -308,6 +341,13 @@ void Table::setup() {
     bounds.y = .9*hig;
     parent->position.x = .05*wid;
     parent->position.y = .05*hig;
+}
+
+void ScoreDisplay::setup() {
+    Point& pp = ((Table*) parent->parent->get_behavior("ob_ptable"))->bounds;
+    score = 0;
+    font = al_load_ttf_font("fonts/DejaVuSans.ttf", -pp.y*0.1, 0);
+    color = al_map_rgb(255,255,255);
 }
 
 // ###########
@@ -397,4 +437,10 @@ void TablePen::draw() {
     Point pp = parent->get_global_position();
     Point& bounds = ((Table*) get_behavior("ob_ptable"))->bounds;
     al_draw_filled_rectangle(pp.x, pp.y, pp.x+bounds.x, pp.y+bounds.y, color);
+}
+
+void ScorePen::draw() {
+    Point pp = parent->get_global_position();
+    ScoreDisplay* score = (ScoreDisplay*) get_behavior("ob_pscore");;
+    al_draw_text(score->font, score->color, pp.x, pp.y, ALLEGRO_ALIGN_CENTRE, std::to_string(score->score).c_str());
 }

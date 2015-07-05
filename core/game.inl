@@ -47,7 +47,7 @@ namespace allframe {
                     GameState* nstate = state->run();
                     state = std::unique_ptr<GameState>(nstate);
                 }
-                std::cout << "end_run" << std::endl;
+                std::cout << "STATUS : end Game::run" << std::endl;
             }
 
         private:

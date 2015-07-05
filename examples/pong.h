@@ -7,6 +7,8 @@
 #include <map>
 #include <set>
 
+#include <allegro5/allegro_font.h>
+
 #include "../core/allframe.h"
 
 using namespace allframe;
@@ -159,6 +161,20 @@ namespace pong {
     class TablePen : public Pen {
         public:
             ALLEGRO_COLOR color = al_map_rgb(40,40,40);
+            void draw();
+    };
+
+    class ScoreDisplay : public ObjectBehavior {
+        public:
+            std::string get_name() const { return "ob_pscore"; }
+            void setup();
+            int score;
+            ALLEGRO_FONT* font;
+            ALLEGRO_COLOR color; 
+    };
+
+    class ScorePen : public Pen {
+        public:
             void draw();
     };
 

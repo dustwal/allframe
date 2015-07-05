@@ -152,7 +152,7 @@ void TickEvent::event(ALLEGRO_EVENT& event) {
 }
 
 void CloseEvent::event(ALLEGRO_EVENT& event) {
-    std::cout << "exiting game" << std::endl;
+    std::cout << "STATUS : exiting game" << std::endl;
     parent->signal_close();
 }
 
@@ -252,7 +252,7 @@ std::string GameState::add_object(std::string name) {
 std::string GameState::add_object_topof(std::string name, std::string topof) {
     auto it = names_to_z->find(topof);
     if (it == names_to_z->end()) {
-        std::cerr << "no object " << topof << " to place on top of." << std::endl;
+        std::cerr << "ERROR  : no object " << topof << " to place on top of." << std::endl;
         return "";
     }
     while (objects->find(name) != objects->end())
