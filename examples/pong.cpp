@@ -75,7 +75,7 @@ void Pong::setup() {
     obj2->set_parent_object(obj);
     obj2->set_pen(new ScorePen);
     obj2->add_behavior(new ScoreDisplay);
-    obj2->position.x = width*.9*.025;
+    obj2->position.x = -width*.9*.025;
     obj2->position.y = height*.9*.025;
 
     name = add_object("go_score2");
@@ -88,7 +88,7 @@ void Pong::setup() {
     obj2->set_parent_object(obj);
     obj2->set_pen(new ScorePen);
     obj2->add_behavior(new ScoreDisplay);
-    obj2->position.x = width*.9*.925;
+    obj2->position.x = width*.9*1.025;
     obj2->position.y = height*.9*.025;
 
     name = add_object("go_mom");
