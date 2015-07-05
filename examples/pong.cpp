@@ -133,7 +133,7 @@ void Player::setup() {
 
 void Player::update() {
     double py = parent->position.y;
-    double newy = py + ppixel_speed*velocity;
+    double newy = py + pix_hig*ppixel_speed*velocity;
     if (newy < 0) newy = 0;
     double maxy = parent_bounds.y-pix_hig;
     if (newy > maxy) newy = maxy;

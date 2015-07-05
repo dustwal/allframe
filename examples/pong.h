@@ -100,7 +100,7 @@ namespace pong {
 
             const float player_wid = .04f;
             const float player_hig = .2f;
-            const float ppixel_speed = 20.0f;
+            const float ppixel_speed = 0.1f;
 
             Bounds* bounds;
 
