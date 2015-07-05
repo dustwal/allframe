@@ -1,5 +1,5 @@
 GCC=g++
-LIBS=`pkg-config --libs allegro_primitives-5.0 allegro_font-5.0 allegro_image-5.0`
+LIBS=`pkg-config --libs allegro_primitives-5.0 allegro_font-5.0 allegro_image-5.0 allegro_ttf-5.0`
 FLAGS=-Wall -g -std=c++14 -O0
 
 all: mini_run mini_games_run input_test_run pong_run display_tool_run

@@ -1,6 +1,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_ttf.h>
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -24,7 +25,13 @@ bool allframe::init() {
     }
     std::cout << "STATUS : Allegro primitives addon initialized" << std::endl;
     al_init_font_addon();
-    std::cout << "STATUS : Allegro font addon initialized(?)" << std::endl;
+    std::cout << "STATUS : Allegro font addon initialized" << std::endl;
+    status = al_init_ttf_addon();
+    if (!status) {
+        std::cerr << "ERROR  : Allegro ttf addon initialization failed" << std::endl;
+        return false; 
+    }
+    std::cout << "STATUS : Allegro ttf addon initialized" << std::endl;
     status = al_init_image_addon();
     if (!status) {
         std::cerr << "ERROR  : Allegro image addon initialization failed" << std::endl;
@@ -37,6 +44,8 @@ bool allframe::init() {
 bool allframe::close() {
     std::cout << "STATUS : shutting down Allegro image addon" << std:: endl;
     al_shutdown_image_addon();
+    std::cout << "STATUS : shutting down Allegro ttf addon" << std::endl;
+    al_shutdown_ttf_addon();
     std::cout << "STATUS : shutting down Allegro font addon" << std::endl;
     al_shutdown_font_addon();
     std::cout << "STATUS : shutting down Allegro primitives addon" << std::endl;
