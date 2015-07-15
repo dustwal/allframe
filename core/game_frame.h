@@ -341,7 +341,7 @@ namespace allframe {
 
     };
 
-};
+}
 
 // template <GameState> class Game 
 #include "game.inl"

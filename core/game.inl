@@ -59,6 +59,6 @@ namespace allframe {
             inline void check_type(GameState*) {}
     };
 
-};
+}
 
 #endif

@@ -190,6 +190,6 @@ namespace pong {
             void destroy();
     };
 
-};
+}
 
 #endif

@@ -18,7 +18,7 @@ namespace allframe {
         ALLEGRO_COLOR random_color();
         ALLEGRO_COLOR random_color_alpha();
 
-    };
+    }
 
     // rotates a Point double radians about the origin
     Point point_rotate(const Point&, double);
@@ -195,5 +195,5 @@ namespace allframe {
     };
 
 
-};
+}
 #endif

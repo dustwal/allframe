@@ -1,6 +1,7 @@
 // Dustin Walde 2015
 // pong_main.cpp
 
+#include <allegro5/allegro.h>
 #include <cstdlib>
 
 #include "pong.h"
